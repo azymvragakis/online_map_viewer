@@ -4,7 +4,7 @@ A high-performance web-based tool for visualizing and filtering seismic data, ea
 
 ## Live Demo
 
-**View Live Application:** [https://azymvragakis.github.io/seismic-map-viewer/](https://azymvragakis.github.io/seismic-map-viewer/)
+**View Live Application:** [https://azymvragakis.github.io/online_map_viewer/](https://azymvragakis.github.io/online_map_viewer/)
 
 ---
 
