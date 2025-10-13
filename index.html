@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Layer Seismic Data Viewer</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+        }
+        
+        #sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 2px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        #main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        #header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        #header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .sidebar-section h2 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .layer-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border: 2px solid #e9ecef;
+            cursor: move;
+            transition: all 0.3s;
+        }
+        
+        .layer-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+        
+        .layer-item.active {
+            border-color: #0c5460;
+            background: #d1ecf1;
+            box-shadow: 0 4px 12px rgba(12, 84, 96, 0.3);
+        }
+        
+        .layer-item.active::before {
+            content: '👉 ACTIVE FOR FILTERING';
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: #0c5460;
+            margin-bottom: 8px;
+            text-align: center;
+            background: #bee5eb;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        
+        .layer-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .layer-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .layer-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .layer-name {
+            flex: 1;
+            font-weight: 600;
+            font-size: 14px;
+            color: #495057;
+        }
+        
+        .layer-count {
+            font-size: 12px;
+            color: #6c757d;
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .layer-controls {
+            display: flex;
+            gap: 5px;
+            margin-left: 32px;
+        }
+        
+        .layer-btn {
+            padding: 4px 8px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            color: #495057;
+            transition: background 0.2s;
+        }
+        
+        .layer-btn:hover {
+            background: #dee2e6;
+        }
+        
+        .layer-opacity {
+            margin-left: 32px;
+            margin-top: 8px;
+        }
+        
+        .layer-opacity input {
+            width: 100%;
+        }
+        
+        #controls {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #495057;
+        }
+        
+        .control-group select,
+        .control-group input {
+            padding: 6px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .control-group button {
+            padding: 6px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .control-group button:hover {
+            background: #5568d3;
+        }
+        
+        #info {
+            padding: 8px 20px;
+            background: #e7f3ff;
+            border-bottom: 1px solid #b3d9ff;
+            font-size: 14px;
+            color: #004085;
+        }
+        
+        #map {
+            flex: 1;
+            width: 100%;
+        }
+        
+        .leaflet-popup-content {
+            margin: 10px;
+            line-height: 1.6;
+        }
+        
+        .leaflet-popup-content h3 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        
+        .leaflet-popup-content table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leaflet-popup-content td {
+            padding: 4px 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .leaflet-popup-content td:first-child {
+            font-weight: 600;
+            color: #495057;
+            width: 40%;
+        }
+        
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <div class="sidebar-section">
+            <h2>📚 Layers</h2>
+            <div id="layer-list"></div>
+        </div>
+        
+        <div class="sidebar-section">
+            <h2>Filter Active Layer</h2>
+            <div id="active-layer-indicator" style="padding: 10px; background: #fff3cd; border: 2px solid #ffc107; border-radius: 6px; margin-bottom: 15px; font-weight: 600; color: #856404; text-align: center;">
+                Click a layer to select it first
+            </div>
+            <div class="control-group" style="flex-direction: column; align-items: stretch;">
+                <label for="filterColumn">Column:</label>
+                <select id="filterColumn">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+            <div class="control-group" style="flex-direction: column; align-items: stretch; margin-top: 10px;">
+                <label for="filterOperator">Operator:</label>
+                <select id="filterOperator" onchange="updateValueInput()">
+                    <option value=">=">&gt;=</option>
+                    <option value="<=">&lt;=</option>
+                    <option value="=">=</option>
+                    <option value=">">&gt;</option>
+                    <option value="<">&lt;</option>
+                </select>
+            </div>
+            <div class="control-group" style="flex-direction: column; align-items: stretch; margin-top: 10px;">
+                <label for="filterValue">Value:</label>
+                <input type="number" id="filterValue" step="any" placeholder="Enter value" style="display: none; width: 100%; padding: 6px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
+                <select id="filterValueSelect" style="display: none; width: 100%; padding: 6px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
+                    <option value="">-- Select Value --</option>
+                </select>
+                <input type="text" id="filterValueText" placeholder="Enter value" style="display: none; width: 100%; padding: 6px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
+            </div>
+            <div class="control-group" style="margin-top: 15px; align-items: center;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="hideNonFiltered" style="width: auto; cursor: pointer;">
+                    <span style="font-size: 13px;">Hide non-matching features</span>
+                </label>
+            </div>
+            <div style="margin-top: 15px; display: flex; gap: 8px;">
+                <button onclick="applyFilter()" style="flex: 1; padding: 8px;">Apply</button>
+                <button onclick="resetFilter()" style="flex: 1; padding: 8px; background: #6c757d;">Reset</button>
+            </div>
+            <div style="margin-top: 8px;">
+                <button onclick="flashFilteredFeatures()" style="width: 100%; padding: 8px; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                    Flash Filtered Features
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="main-content">
+        <div id="header">
+            <h1>Multi-Layer Seismic Data Viewer</h1>
+            <p>Toggle layers, adjust opacity, and filter data interactively</p>
+        </div>
+        
+        <div id="info">
+            Loading layers...
+        </div>
+        
+        <div id="map"></div>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Layer configuration
+        const layerConfigs = [
+            {
+                name: 'ESHM13 Vanilla',
+                file: 'data_vanilla.geojson',
+                color: '#667eea',
+                visible: true,
+                zIndex: 1,
+                size: 6  // Default size for points/borders
+            },
+            {
+                name: 'ESHM13 Edited',
+                file: 'data_edited.geojson',
+                color: '#f093fb',
+                visible: true,
+                zIndex: 2,
+                size: 6
+            },
+            {
+                name: 'Catalogue',
+                file: 'data_catalogue.geojson',
+                color: '#ffcc00',
+                visible: true,
+                zIndex: 3,
+                size: 6
+            },
+            {
+                name: 'Focal Mechanisms',
+                file: 'data_fm.geojson',
+                color: '#28a745',
+                visible: true,
+                zIndex: 4,
+                size: 6
+            }
+        ];
+        
+        // Initialize the map
+        let map = L.map('map').setView([45, 10], 4);
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(map);
+        
+        // Create canvas renderer for better performance with large datasets
+        const canvasRenderer = L.canvas({ padding: 0.5 });
+        
+        // Store layers
+        let layers = {};
+        let activeLayerId = null;
+        
+        // Function to show all feature details in a modal
+        window.showFeatureDetails = function(layerId, properties) {
+            const layerName = layers[layerId].config.name;
+            let detailsHtml = `<div style="font-family: Arial, sans-serif;">
+                <h2 style="color: #667eea; margin-bottom: 15px;">${layerName} - Feature Details</h2>
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="background: #f0f0f0;">
+                            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Property</th>
+                            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            for (let key in properties) {
+                if (properties.hasOwnProperty(key)) {
+                    const value = properties[key] !== null ? properties[key] : '<em style="color: #999;">null</em>';
+                    detailsHtml += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; color: #555;">${key}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${value}</td>
+                        </tr>`;
+                }
+            }
+            
+            detailsHtml += `</tbody></table></div>`;
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.7); z-index: 10000; 
+                display: flex; align-items: center; justify-content: center;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white; padding: 20px; border-radius: 8px; 
+                max-width: 800px; max-height: 80vh; overflow-y: auto; 
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            `;
+            modalContent.innerHTML = detailsHtml;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'Close';
+            closeBtn.style.cssText = `
+                margin-top: 15px; padding: 10px 20px; background: #667eea; 
+                color: white; border: none; border-radius: 4px; cursor: pointer; 
+                font-size: 14px; width: 100%;
+            `;
+            closeBtn.onclick = () => document.body.removeChild(modal);
+            
+            modalContent.appendChild(closeBtn);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Close on background click
+            modal.onclick = (e) => {
+                if (e.target === modal) document.body.removeChild(modal);
+            };
+        };
+        
+        // Load all layers
+        let loadedCount = 0;
+        layerConfigs.forEach((config, index) => {
+            fetch(config.file)
+                .then(response => response.json())
+                .then(data => {
+                    layers[index] = {
+                        config: config,
+                        data: data,
+                        originalData: JSON.parse(JSON.stringify(data)),
+                        leafletLayer: null,
+                        opacity: 0.7
+                    };
+                    
+                    createLayer(index);
+                    loadedCount++;
+                    
+                    if (loadedCount === layerConfigs.length) {
+                        renderLayerList();
+                        updateInfo();
+                        fitMapToLayers();
+                        updateActiveLayerIndicator();
+                    }
+                })
+                .catch(error => {
+                    console.error(`Error loading ${config.name}:`, error);
+                    loadedCount++;
+                });
+        });
+        
+        // Create Leaflet layer
+        function createLayer(layerId) {
+            const layer = layers[layerId];
+            
+            if (layer.leafletLayer) {
+                map.removeLayer(layer.leafletLayer);
+            }
+            
+            // Check if we should hide non-filtered features
+            const hideNonFiltered = document.getElementById('hideNonFiltered')?.checked || false;
+            
+            // Function to check if a feature matches the filter
+            const featureMatchesFilter = (feature) => {
+                if (!layer.isFiltered) return false;
+                
+                const propValue = feature.properties[layer.filterColumn];
+                
+                if (layer.filterColumnType === 'number') {
+                    const numValue = parseFloat(layer.filterValue);
+                    switch(layer.filterOperator) {
+                        case '>=': return propValue >= numValue;
+                        case '<=': return propValue <= numValue;
+                        case '=': return propValue === numValue;
+                        case '>': return propValue > numValue;
+                        case '<': return propValue < numValue;
+                        default: return false;
+                    }
+                } else {
+                    // String comparison (exact match)
+                    return propValue === layer.filterValue;
+                }
+            };
+            
+            // Determine which features to show
+            let dataToRender = layer.data;
+            if (layer.isFiltered && hideNonFiltered) {
+                // Filter out non-matching features completely
+                dataToRender = {
+                    type: 'FeatureCollection',
+                    features: layer.data.features.filter(featureMatchesFilter)
+                };
+            }
+            
+            // Detect if this is a large dataset (>10,000 features)
+            const isLargeDataset = dataToRender.features.length > 10000;
+            
+            layer.leafletLayer = L.geoJSON(dataToRender, {
+                renderer: canvasRenderer, // Use canvas for better performance
+                pointToLayer: function(feature, latlng) {
+                    const isHighlighted = featureMatchesFilter(feature);
+                    
+                    // Determine base color: use attribute-based color if enabled, otherwise use layer color
+                    let baseColor = layer.config.color;
+                    if (layer.colorByAttribute?.enabled && layer.colorByAttribute?.column && layer.colorByAttribute?.mappings) {
+                        const attrValue = String(feature.properties[layer.colorByAttribute.column]);
+                        baseColor = layer.colorByAttribute.mappings[attrValue] || layer.config.color;
+                    }
+                    
+                    // Use flash color/size if flashing, otherwise use normal colors
+                    // Filtered features (highlighted) always use aqua or flash color (overrides attribute color)
+                    const highlightColor = layer.flashColor || '#00ffff';
+                    const color = isHighlighted ? highlightColor : baseColor;
+                    const opacity = isHighlighted ? layer.opacity : layer.opacity * 0.4;
+                    const baseSize = layer.config.size || 6;
+                    const highlightSize = layer.flashSize || (baseSize + 2);
+                    
+                    return L.circleMarker(latlng, {
+                        renderer: canvasRenderer,
+                        radius: isHighlighted ? highlightSize : baseSize,
+                        fillColor: color,
+                        color: isHighlighted ? "#fff" : "#fff",
+                        weight: isHighlighted ? Math.min(baseSize / 2, 3) : Math.min(baseSize / 3, 2),
+                        opacity: opacity,
+                        fillOpacity: opacity
+                    });
+                },
+                style: function(feature) {
+                    if (feature.geometry.type !== 'Point') {
+                        const isHighlighted = featureMatchesFilter(feature);
+                        
+                        // Determine base color: use attribute-based color if enabled, otherwise use layer color
+                        let baseColor = layer.config.color;
+                        if (layer.colorByAttribute?.enabled && layer.colorByAttribute?.column && layer.colorByAttribute?.mappings) {
+                            const attrValue = String(feature.properties[layer.colorByAttribute.column]);
+                            baseColor = layer.colorByAttribute.mappings[attrValue] || layer.config.color;
+                        }
+                        
+                        // Use flash color/size if flashing, otherwise use normal colors
+                        // Filtered features (highlighted) always use aqua or flash color (overrides attribute color)
+                        const highlightColor = layer.flashColor || '#00ffff';
+                        const color = isHighlighted ? highlightColor : baseColor;
+                        const opacity = isHighlighted ? layer.opacity : layer.opacity * 0.4; // Dim non-filtered
+                        const baseSize = layer.config.size || 6;
+                        const highlightSize = layer.flashSize || baseSize;
+                        
+                        return {
+                            color: color,
+                            weight: isHighlighted ? highlightSize : Math.max(1, baseSize - 1),
+                            opacity: opacity,
+                            fillOpacity: opacity * 0.5
+                        };
+                    }
+                },
+                onEachFeature: function(feature, leafletLayer) {
+                    // For large datasets, create simpler popup generation on-demand
+                    if (isLargeDataset) {
+                        // Lazy popup creation for performance
+                        leafletLayer.on('click', function(e) {
+                            const props = feature.properties;
+                            let popupContent = `
+                                <div style="max-height: 300px; overflow-y: auto; min-width: 200px;">
+                                    <h3 style="margin: 0 0 10px 0; color: #333;">${layer.config.name}</h3>
+                                    <table style="width: 100%; font-size: 12px; border-collapse: collapse;">`;
+                            
+                            // Show first 3 properties for large datasets
+                            let count = 0;
+                            for (let key in props) {
+                                if (props.hasOwnProperty(key) && count < 3) {
+                                    const value = props[key] !== null ? props[key] : 'null';
+                                    popupContent += `
+                                        <tr style="border-bottom: 1px solid #eee;">
+                                            <td style="padding: 4px; font-weight: bold; color: #555;">${key}:</td>
+                                            <td style="padding: 4px;">${value}</td>
+                                        </tr>`;
+                                    count++;
+                                }
+                            }
+                            
+                            popupContent += `</table></div>`;
+                            
+                            leafletLayer.bindPopup(popupContent, {
+                                maxWidth: 400,
+                                maxHeight: 300,
+                                autoPan: true,
+                                autoPanPadding: [50, 50]
+                            }).openPopup();
+                            
+                            // Zoom to the feature
+                            if (feature.geometry.type === 'Point') {
+                                map.setView(e.latlng, Math.max(map.getZoom(), 10));
+                            } else {
+                                const bounds = leafletLayer.getBounds();
+                                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+                            }
+                        });
+                    } else {
+                        // Normal popup generation for smaller datasets
+                        const props = feature.properties;
+                        let popupContent = `
+                            <div style="max-height: 300px; overflow-y: auto; min-width: 200px;">
+                                <h3 style="margin: 0 0 10px 0; color: #333;">${layer.config.name}</h3>
+                                <table style="width: 100%; font-size: 12px; border-collapse: collapse;">`;
+                        
+                        // Show first 5 properties
+                        let count = 0;
+                        for (let key in props) {
+                            if (props.hasOwnProperty(key) && count < 5) {
+                                const value = props[key] !== null ? props[key] : 'null';
+                                popupContent += `
+                                    <tr style="border-bottom: 1px solid #eee;">
+                                        <td style="padding: 4px; font-weight: bold; color: #555;">${key}:</td>
+                                        <td style="padding: 4px;">${value}</td>
+                                    </tr>`;
+                                count++;
+                            }
+                        }
+                        
+                        popupContent += `</table>`;
+                        
+                        // Add button to show all details
+                        if (Object.keys(props).length > 5) {
+                            popupContent += `
+                                <button onclick="showFeatureDetails(${layerId}, ${JSON.stringify(props).replace(/"/g, '&quot;')})" 
+                                        style="margin-top: 10px; width: 100%; padding: 6px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Show All Details (${Object.keys(props).length} fields)
+                                </button>`;
+                        }
+                        
+                        popupContent += `</div>`;
+                        
+                        leafletLayer.bindPopup(popupContent, {
+                            maxWidth: 400,
+                            maxHeight: 300,
+                            autoPan: true,
+                            autoPanPadding: [50, 50]
+                        });
+                        
+                        // Zoom to feature on click
+                        leafletLayer.on('click', function(e) {
+                            // Zoom to the feature bounds
+                            if (feature.geometry.type === 'Point') {
+                                map.setView(e.latlng, Math.max(map.getZoom(), 10));
+                            } else {
+                                const bounds = leafletLayer.getBounds();
+                                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+                            }
+                        });
+                    }
+                }
+            });
+            
+            // Set z-index using pane
+            layer.leafletLayer.options.pane = `layer-${layerId}`;
+            const pane = map.createPane(`layer-${layerId}`);
+            pane.style.zIndex = 400 + layer.config.zIndex;
+            
+            if (layer.config.visible) {
+                layer.leafletLayer.addTo(map);
+            }
+        }
+        
+        // Render layer list in sidebar
+        function renderLayerList() {
+            const container = document.getElementById('layer-list');
+            container.innerHTML = '';
+            
+            // Sort by z-index (top to bottom)
+            const sortedIds = Object.keys(layers).sort((a, b) => 
+                layers[b].config.zIndex - layers[a].config.zIndex
+            );
+            
+            sortedIds.forEach(layerId => {
+                const layer = layers[layerId];
+                const div = document.createElement('div');
+                div.className = 'layer-item' + (activeLayerId == layerId ? ' active' : '');
+                div.onclick = () => setActiveLayer(layerId);
+                
+                div.innerHTML = `
+                    <div class="layer-header">
+                        <input type="checkbox" class="layer-checkbox" 
+                               ${layer.config.visible ? 'checked' : ''}
+                               onchange="toggleLayer(${layerId}, this.checked)"
+                               onclick="event.stopPropagation()">
+                        <div class="layer-color" style="background: ${layer.config.color}"></div>
+                        <span class="layer-name">${layer.config.name}</span>
+                        <span class="layer-count">${layer.data.features.length}</span>
+                    </div>
+                    <div class="layer-controls">
+                        <button class="layer-btn" onclick="event.stopPropagation(); moveLayer(${layerId}, 'up')">↑</button>
+                        <button class="layer-btn" onclick="event.stopPropagation(); moveLayer(${layerId}, 'down')">↓</button>
+                    </div>
+                    <div class="layer-opacity">
+                        <label style="font-size: 11px; color: #6c757d;">Opacity:</label>
+                        <input type="range" min="0" max="100" value="${layer.opacity * 100}"
+                               onchange="updateOpacity(${layerId}, this.value)"
+                               onclick="event.stopPropagation()">
+                    </div>
+                    <div style="margin-left: 32px; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;" onclick="event.stopPropagation()">
+                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                            <label style="font-size: 11px; color: #6c757d; width: 45px;">Color:</label>
+                            <select id="colorSelect_${layerId}" style="flex: 1; padding: 4px; font-size: 12px; border: 1px solid #ced4da; border-radius: 4px;">
+                                <option value="#ff6b6b" ${layer.config.color === '#ff6b6b' ? 'selected' : ''}>Red</option>
+                                <option value="#4ecdc4" ${layer.config.color === '#4ecdc4' ? 'selected' : ''}>Cyan</option>
+                                <option value="#45b7d1" ${layer.config.color === '#45b7d1' ? 'selected' : ''}>Blue</option>
+                                <option value="#96ceb4" ${layer.config.color === '#96ceb4' ? 'selected' : ''}>Green</option>
+                                <option value="#ffeaa7" ${layer.config.color === '#ffeaa7' ? 'selected' : ''}>Yellow</option>
+                                <option value="#fd79a8" ${layer.config.color === '#fd79a8' ? 'selected' : ''}>Pink</option>
+                                <option value="#a29bfe" ${layer.config.color === '#a29bfe' ? 'selected' : ''}>Purple</option>
+                                <option value="#fd7e14" ${layer.config.color === '#fd7e14' ? 'selected' : ''}>Orange</option>
+                                <option value="#6c757d" ${layer.config.color === '#6c757d' ? 'selected' : ''}>Gray</option>
+                                <option value="#2d3436" ${layer.config.color === '#2d3436' ? 'selected' : ''}>Dark</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                            <label style="font-size: 11px; color: #6c757d; width: 45px;">Size:</label>
+                            <input type="number" id="sizeInput_${layerId}" min="1" max="20" value="${layer.config.size || 6}" 
+                                   style="flex: 1; padding: 4px; font-size: 12px; border: 1px solid #ced4da; border-radius: 4px;">
+                            <span style="font-size: 10px; color: #6c757d;">px</span>
+                        </div>
+                        <button onclick="applyStyleChanges(${layerId})" 
+                                style="width: 100%; padding: 6px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                            Apply Style
+                        </button>
+                    </div>
+                    
+                    <div style="margin-left: 32px; margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 4px; border: 1px solid #ffc107;" onclick="event.stopPropagation()">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <input type="checkbox" id="colorByAttr_${layerId}" onchange="toggleColorByAttribute(${layerId}, this.checked)" 
+                                   ${layer.colorByAttribute?.enabled ? 'checked' : ''}
+                                   style="width: auto; cursor: pointer;">
+                            <label style="font-size: 12px; font-weight: 600; color: #856404; cursor: pointer;" 
+                                   for="colorByAttr_${layerId}">Color by Attribute</label>
+                        </div>
+                        
+                        <div id="colorByAttrPanel_${layerId}" style="display: ${layer.colorByAttribute?.enabled ? 'block' : 'none'};">
+                            <div style="margin-bottom: 8px;">
+                                <label style="font-size: 11px; color: #856404; display: block; margin-bottom: 4px;">Attribute Column:</label>
+                                <select id="attrColumn_${layerId}" onchange="updateAttributeValues(${layerId})" 
+                                        style="width: 100%; padding: 4px; font-size: 12px; border: 1px solid #ffc107; border-radius: 4px;">
+                                    <option value="">-- Select Column --</option>
+                                </select>
+                            </div>
+                            
+                            <div id="colorMappings_${layerId}" style="max-height: 200px; overflow-y: auto; margin-bottom: 8px;">
+                                <!-- Color mappings will be inserted here -->
+                            </div>
+                            
+                            <button onclick="applyColorByAttribute(${layerId})" 
+                                    style="width: 100%; padding: 6px; background: #ffc107; color: #856404; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                                Apply Attribute Colors
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+            
+            // Populate attribute columns for layers with colorByAttribute enabled
+            Object.keys(layers).forEach(layerId => {
+                if (layers[layerId].colorByAttribute?.enabled) {
+                    populateAttributeColumns(layerId);
+                }
+            });
+        }
+        
+        // Toggle layer visibility
+        function toggleLayer(layerId, visible) {
+            layers[layerId].config.visible = visible;
+            
+            if (visible) {
+                layers[layerId].leafletLayer.addTo(map);
+            } else {
+                map.removeLayer(layers[layerId].leafletLayer);
+            }
+            
+            updateInfo();
+        }
+        
+        // Set active layer for filtering
+        function setActiveLayer(layerId) {
+            activeLayerId = layerId;
+            renderLayerList();
+            populateFilterOptions();
+            updateActiveLayerIndicator();
+        }
+        
+        // Update the active layer indicator
+        function updateActiveLayerIndicator() {
+            const indicator = document.getElementById('active-layer-indicator');
+            if (activeLayerId === null) {
+                indicator.style.background = '#fff3cd';
+                indicator.style.borderColor = '#ffc107';
+                indicator.style.color = '#856404';
+                indicator.innerHTML = 'Click a layer to select it first';
+            } else {
+                const layer = layers[activeLayerId];
+                indicator.style.background = '#d1ecf1';
+                indicator.style.borderColor = '#0c5460';
+                indicator.style.color = '#0c5460';
+                indicator.innerHTML = `Filtering: <strong>${layer.config.name}</strong>`;
+            }
+        }
+        
+        // Move layer up/down in z-order
+        function moveLayer(layerId, direction) {
+            const layer = layers[layerId];
+            const sortedIds = Object.keys(layers).sort((a, b) => 
+                layers[a].config.zIndex - layers[b].config.zIndex
+            );
+            const currentIndex = sortedIds.indexOf(layerId.toString());
+            
+            if (direction === 'up' && currentIndex < sortedIds.length - 1) {
+                const swapId = sortedIds[currentIndex + 1];
+                const temp = layer.config.zIndex;
+                layer.config.zIndex = layers[swapId].config.zIndex;
+                layers[swapId].config.zIndex = temp;
+            } else if (direction === 'down' && currentIndex > 0) {
+                const swapId = sortedIds[currentIndex - 1];
+                const temp = layer.config.zIndex;
+                layer.config.zIndex = layers[swapId].config.zIndex;
+                layers[swapId].config.zIndex = temp;
+            }
+            
+            // Recreate layers with new z-index
+            Object.keys(layers).forEach(id => createLayer(id));
+            renderLayerList();
+        }
+        
+        // Update layer opacity
+        function updateOpacity(layerId, value) {
+            layers[layerId].opacity = value / 100;
+            createLayer(layerId);
+        }
+        
+        // Toggle color by attribute
+        function toggleColorByAttribute(layerId, enabled) {
+            const layer = layers[layerId];
+            if (!layer.colorByAttribute) {
+                layer.colorByAttribute = {};
+            }
+            layer.colorByAttribute.enabled = enabled;
+            
+            const panel = document.getElementById(`colorByAttrPanel_${layerId}`);
+            if (panel) {
+                panel.style.display = enabled ? 'block' : 'none';
+            }
+            
+            if (enabled) {
+                populateAttributeColumns(layerId);
+            } else {
+                // Disable attribute coloring and recreate layer
+                layer.colorByAttribute.column = null;
+                layer.colorByAttribute.mappings = null;
+                createLayer(layerId);
+            }
+        }
+        
+        // Populate attribute columns for color by attribute
+        function populateAttributeColumns(layerId) {
+            const layer = layers[layerId];
+            const select = document.getElementById(`attrColumn_${layerId}`);
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">-- Select Column --</option>';
+            
+            // Get all columns from first feature
+            const firstFeature = layer.originalData.features[0];
+            if (!firstFeature) return;
+            
+            Object.keys(firstFeature.properties).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = key;
+                if (layer.colorByAttribute?.column === key) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            // If a column is already selected, populate values
+            if (layer.colorByAttribute?.column) {
+                updateAttributeValues(layerId);
+            }
+        }
+        
+        // Update attribute values and create color mappings
+        function updateAttributeValues(layerId) {
+            const layer = layers[layerId];
+            const select = document.getElementById(`attrColumn_${layerId}`);
+            const column = select.value;
+            
+            if (!column) {
+                document.getElementById(`colorMappings_${layerId}`).innerHTML = '';
+                return;
+            }
+            
+            // Get unique values for this column
+            const uniqueValues = new Set();
+            layer.originalData.features.forEach(feature => {
+                const value = feature.properties[column];
+                if (value !== null && value !== undefined) {
+                    uniqueValues.add(String(value));
+                }
+            });
+            
+            // Create color mapping inputs
+            const mappingsDiv = document.getElementById(`colorMappings_${layerId}`);
+            mappingsDiv.innerHTML = '<div style="font-size: 11px; color: #856404; margin-bottom: 6px; font-weight: 600;">Value → Color Mappings:</div>';
+            
+            const colorOptions = [
+                { value: '#ff6b6b', label: 'Red' },
+                { value: '#4ecdc4', label: 'Cyan' },
+                { value: '#45b7d1', label: 'Blue' },
+                { value: '#96ceb4', label: 'Green' },
+                { value: '#ffeaa7', label: 'Yellow' },
+                { value: '#fd79a8', label: 'Pink' },
+                { value: '#a29bfe', label: 'Purple' },
+                { value: '#fd7e14', label: 'Orange' },
+                { value: '#6c757d', label: 'Gray' },
+                { value: '#2d3436', label: 'Dark' },
+                { value: '#000000', label: 'Black' },
+                { value: '#ffffff', label: 'White' }
+            ];
+            
+            Array.from(uniqueValues).sort().forEach((value, index) => {
+                const savedColor = layer.colorByAttribute?.mappings?.[value] || colorOptions[index % colorOptions.length].value;
+                
+                const mappingDiv = document.createElement('div');
+                mappingDiv.style.cssText = 'display: flex; gap: 4px; align-items: center; margin-bottom: 4px; font-size: 11px;';
+                
+                mappingDiv.innerHTML = `
+                    <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #856404;" title="${value}">${value}</span>
+                    <span style="color: #856404;">→</span>
+                    <select id="colorMap_${layerId}_${value}" style="flex: 1; padding: 2px; font-size: 11px; border: 1px solid #ffc107; border-radius: 3px;">
+                        ${colorOptions.map(opt => `<option value="${opt.value}" ${opt.value === savedColor ? 'selected' : ''}>${opt.label}</option>`).join('')}
+                    </select>
+                `;
+                
+                mappingsDiv.appendChild(mappingDiv);
+            });
+        }
+        
+        // Apply color by attribute settings
+        function applyColorByAttribute(layerId) {
+            const layer = layers[layerId];
+            const column = document.getElementById(`attrColumn_${layerId}`)?.value;
+            
+            if (!column) {
+                alert('Please select an attribute column first!');
+                return;
+            }
+            
+            // Collect all color mappings
+            const mappings = {};
+            const uniqueValues = new Set();
+            layer.originalData.features.forEach(feature => {
+                const value = feature.properties[column];
+                if (value !== null && value !== undefined) {
+                    uniqueValues.add(String(value));
+                }
+            });
+            
+            uniqueValues.forEach(value => {
+                const select = document.getElementById(`colorMap_${layerId}_${value}`);
+                if (select) {
+                    mappings[value] = select.value;
+                }
+            });
+            
+            // Save settings
+            layer.colorByAttribute = {
+                enabled: true,
+                column: column,
+                mappings: mappings
+            };
+            
+            // Recreate layer with new colors
+            createLayer(layerId);
+            renderLayerList();
+        }
+        
+        // Apply style changes (color and size)
+        function applyStyleChanges(layerId) {
+            const colorSelect = document.getElementById(`colorSelect_${layerId}`);
+            const sizeInput = document.getElementById(`sizeInput_${layerId}`);
+            
+            if (colorSelect && sizeInput) {
+                const newColor = colorSelect.value;
+                const newSize = parseInt(sizeInput.value);
+                
+                // Update layer config
+                layers[layerId].config.color = newColor;
+                layers[layerId].config.size = newSize;
+                
+                // Recreate the layer with new styles
+                createLayer(layerId);
+                renderLayerList();
+            }
+        }
+        
+        // Populate filter options from active layer
+        function populateFilterOptions() {
+            const filterColumn = document.getElementById('filterColumn');
+            filterColumn.innerHTML = '<option value="">-- Select --</option>';
+            
+            if (activeLayerId === null || !layers[activeLayerId]) return;
+            
+            // Always use originalData to get all columns
+            const layer = layers[activeLayerId];
+            
+            // Build a map of column names to their types
+            // For each column, find the first non-null value to determine the correct type
+            const columnTypes = {};
+            const firstFeatureProps = layer.originalData.features[0]?.properties || {};
+            
+            // Initialize all columns from first feature
+            for (let key in firstFeatureProps) {
+                columnTypes[key] = null; // Will be determined later
+            }
+            
+            // For each column, find first non-null value to determine type
+            for (let key in columnTypes) {
+                for (let feature of layer.originalData.features) {
+                    const value = feature.properties[key];
+                    if (value !== null && value !== undefined) {
+                        columnTypes[key] = typeof value;
+                        break; // Found a non-null value for this column
+                    }
+                }
+                // If all values are null, default to "object"
+                if (columnTypes[key] === null) {
+                    columnTypes[key] = "object";
+                }
+            }
+            
+            // Add ALL columns to dropdown
+            for (let key in columnTypes) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = `${key} (${columnTypes[key]})`;
+                option.dataset.type = columnTypes[key];
+                filterColumn.appendChild(option);
+            }
+            
+            // Update value input when column changes
+            filterColumn.onchange = updateValueInput;
+            
+            // Reset value inputs when switching layers
+            document.getElementById('filterValue').style.display = 'none';
+            document.getElementById('filterValueSelect').style.display = 'none';
+            document.getElementById('filterValueText').style.display = 'none';
+            document.getElementById('filterValue').value = '';
+            document.getElementById('filterValueSelect').value = '';
+            document.getElementById('filterValueText').value = '';
+        }
+        
+        // Update value input based on selected column type
+        function updateValueInput() {
+            const filterColumn = document.getElementById('filterColumn');
+            const filterOperator = document.getElementById('filterOperator');
+            const filterValue = document.getElementById('filterValue');
+            const filterValueSelect = document.getElementById('filterValueSelect');
+            const filterValueText = document.getElementById('filterValueText');
+            
+            // Hide all inputs first
+            filterValue.style.display = 'none';
+            filterValueSelect.style.display = 'none';
+            filterValueText.style.display = 'none';
+            
+            const selectedOption = filterColumn.options[filterColumn.selectedIndex];
+            if (!selectedOption || !selectedOption.dataset.type) return;
+            
+            // Check if we have an active layer
+            if (activeLayerId === null || !layers[activeLayerId]) {
+                alert('Please select a layer first (click on a layer card)');
+                return;
+            }
+            
+            const columnType = selectedOption.dataset.type;
+            const columnName = filterColumn.value;
+            
+            if (columnType === 'number') {
+                // Show numeric input and all operators
+                filterValue.style.display = 'block';
+                filterOperator.innerHTML = `
+                    <option value=">=">&gt;=</option>
+                    <option value="<=">&lt;=</option>
+                    <option value="=">=</option>
+                    <option value=">">&gt;</option>
+                    <option value="<">&lt;</option>
+                `;
+            } else if (columnType === 'string') {
+                // Show dropdown with unique values and only "=" operator
+                filterValueSelect.style.display = 'block';
+                filterOperator.innerHTML = `<option value="=">=</option>`;
+                
+                // Populate unique values from the active layer's original data
+                const layer = layers[activeLayerId];
+                const uniqueValues = new Set();
+                
+                // Make sure we have the data
+                if (!layer.originalData || !layer.originalData.features) {
+                    console.error('No data available for layer', activeLayerId);
+                    return;
+                }
+                
+                layer.originalData.features.forEach(feature => {
+                    const value = feature.properties[columnName];
+                    if (value !== null && value !== undefined) {
+                        uniqueValues.add(value);
+                    }
+                });
+                
+                filterValueSelect.innerHTML = '<option value="">-- Select Value --</option>';
+                Array.from(uniqueValues).sort().forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    filterValueSelect.appendChild(option);
+                });
+            } else {
+                // For other types, show text input
+                filterValueText.style.display = 'block';
+                filterOperator.innerHTML = `<option value="=">=</option>`;
+            }
+        }
+        
+        // Apply filter to active layer
+        function applyFilter() {
+            if (activeLayerId === null) {
+                alert('Please select a layer first (click on it)');
+                return;
+            }
+            
+            const column = document.getElementById('filterColumn').value;
+            const operator = document.getElementById('filterOperator').value;
+            const filterValue = document.getElementById('filterValue');
+            const filterValueSelect = document.getElementById('filterValueSelect');
+            const filterValueText = document.getElementById('filterValueText');
+            
+            if (!column) {
+                alert('Please select a column');
+                return;
+            }
+            
+            // Get value based on which input is visible
+            let value;
+            if (filterValue.style.display !== 'none') {
+                value = parseFloat(filterValue.value);
+                if (isNaN(value)) {
+                    alert('Please enter a valid number');
+                    return;
+                }
+            } else if (filterValueSelect.style.display !== 'none') {
+                value = filterValueSelect.value;
+                if (!value) {
+                    alert('Please select a value');
+                    return;
+                }
+            } else if (filterValueText.style.display !== 'none') {
+                value = filterValueText.value;
+                if (!value) {
+                    alert('Please enter a value');
+                    return;
+                }
+            }
+            
+            const layer = layers[activeLayerId];
+            const selectedOption = document.getElementById('filterColumn').options[document.getElementById('filterColumn').selectedIndex];
+            const columnType = selectedOption.dataset.type;
+            
+            // Store filter criteria for highlighting
+            layer.filterColumn = column;
+            layer.filterOperator = operator;
+            layer.filterValue = value;
+            layer.filterColumnType = columnType;
+            
+            // Keep all features visible, but mark which ones match
+            layer.data = layer.originalData; // Show all features
+            
+            // Count matching features
+            let matchCount = 0;
+            layer.originalData.features.forEach(feature => {
+                const propValue = feature.properties[column];
+                let matches = false;
+                
+                if (columnType === 'number') {
+                    const numValue = parseFloat(value);
+                    switch(operator) {
+                        case '>=': matches = propValue >= numValue; break;
+                        case '<=': matches = propValue <= numValue; break;
+                        case '=': matches = propValue === numValue; break;
+                        case '>': matches = propValue > numValue; break;
+                        case '<': matches = propValue < numValue; break;
+                        default: matches = true;
+                    }
+                } else {
+                    // String comparison (exact match)
+                    matches = propValue === value;
+                }
+                
+                if (matches) matchCount++;
+            });
+            
+            // Mark layer as filtered for highlighting
+            layer.isFiltered = true;
+            
+            createLayer(activeLayerId);
+            renderLayerList();
+            updateInfo();
+            
+            // Don't auto-zoom - let user manually zoom to see filtered features
+            alert(`Filter applied! Found ${matchCount} matching feature(s).`);
+        }
+        
+        // Reset filter
+        function resetFilter() {
+            if (activeLayerId === null) return;
+            
+            document.getElementById('filterColumn').value = '';
+            document.getElementById('filterValue').value = '';
+            document.getElementById('filterValueSelect').value = '';
+            document.getElementById('filterValueText').value = '';
+            
+            const layer = layers[activeLayerId];
+            layer.data = JSON.parse(JSON.stringify(layer.originalData));
+            layer.isFiltered = false;
+            layer.filterColumn = null;
+            layer.filterOperator = null;
+            layer.filterValue = null;
+            layer.filterColumnType = null;
+            
+            createLayer(activeLayerId);
+            renderLayerList();
+            updateInfo();
+        }
+        
+        // Flash filtered features to make them easier to spot
+        function flashFilteredFeatures() {
+            if (activeLayerId === null) {
+                alert('Please select a layer first!');
+                return;
+            }
+            
+            const layer = layers[activeLayerId];
+            if (!layer.isFiltered) {
+                alert('Please apply a filter first!');
+                return;
+            }
+            
+            // Count matching features
+            let matchCount = 0;
+            layer.data.features.forEach(feature => {
+                const propValue = feature.properties[layer.filterColumn];
+                let matches = false;
+                
+                if (layer.filterColumnType === 'number') {
+                    const numValue = parseFloat(layer.filterValue);
+                    switch(layer.filterOperator) {
+                        case '>=': matches = propValue >= numValue; break;
+                        case '<=': matches = propValue <= numValue; break;
+                        case '=': matches = propValue === numValue; break;
+                        case '>': matches = propValue > numValue; break;
+                        case '<': matches = propValue < numValue; break;
+                    }
+                } else {
+                    matches = propValue === layer.filterValue;
+                }
+                
+                if (matches) matchCount++;
+            });
+            
+            if (matchCount === 0) {
+                alert('No matching features to flash!');
+                return;
+            }
+            
+            // Flash animation - pulse 4 times by changing the highlight color temporarily
+            const originalSize = layer.config.size;
+            let flashCount = 0;
+            const maxFlashes = 4;
+            
+            const flashInterval = setInterval(() => {
+                if (flashCount >= maxFlashes * 2) {
+                    // Restore original style
+                    layer.flashColor = null;
+                    layer.flashSize = null;
+                    createLayer(activeLayerId);
+                    clearInterval(flashInterval);
+                    return;
+                }
+                
+                // Toggle between flash and original
+                if (flashCount % 2 === 0) {
+                    // Flash on - bright red and larger (only for FILTERED features)
+                    layer.flashColor = '#ff0000'; // Bright red
+                    layer.flashSize = originalSize + 4;
+                } else {
+                    // Flash off - back to normal highlight (aqua)
+                    layer.flashColor = null;
+                    layer.flashSize = null;
+                }
+                
+                createLayer(activeLayerId);
+                flashCount++;
+            }, 300); // Flash every 300ms
+        }
+        
+        // Fit map to all visible layers
+        function fitMapToLayers() {
+            const bounds = L.latLngBounds([]);
+            let hasFeatures = false;
+            
+            Object.keys(layers).forEach(layerId => {
+                if (layers[layerId].config.visible && layers[layerId].leafletLayer) {
+                    const layerBounds = layers[layerId].leafletLayer.getBounds();
+                    if (layerBounds.isValid()) {
+                        bounds.extend(layerBounds);
+                        hasFeatures = true;
+                    }
+                }
+            });
+            
+            if (hasFeatures) {
+                map.fitBounds(bounds);
+            }
+        }
+        
+        // Update info bar
+        function updateInfo() {
+            const info = document.getElementById('info');
+            const visibleLayers = Object.keys(layers).filter(id => layers[id].config.visible);
+            
+            if (visibleLayers.length === 0) {
+                info.innerHTML = 'No layers visible';
+            } else {
+                const details = visibleLayers.map(id => {
+                    const layer = layers[id];
+                    const filtered = layer.data.features.length !== layer.originalData.features.length;
+                    return `<strong>${layer.config.name}</strong>: ${layer.data.features.length}${filtered ? ' (filtered)' : ''} features`;
+                }).join(' | ');
+                info.innerHTML = details;
+            }
+        }
+        
+        // Add event listener for hide checkbox
+        document.addEventListener('DOMContentLoaded', function() {
+            const hideCheckbox = document.getElementById('hideNonFiltered');
+            if (hideCheckbox) {
+                hideCheckbox.addEventListener('change', function() {
+                    // Re-render the active layer when checkbox state changes
+                    if (activeLayerId !== null && layers[activeLayerId].isFiltered) {
+                        createLayer(activeLayerId);
+                        updateInfo();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

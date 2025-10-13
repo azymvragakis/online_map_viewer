@@ -1,0 +1,60 @@
+"""
+Convert multiple shapefiles to GeoJSON for web mapping
+"""
+import geopandas as gpd
+import json
+
+# List of shapefiles to convert
+shapefiles = [
+    {'input': 'eshm13_vanilla.shp', 'output': 'data_vanilla.geojson', 'name': 'Vanilla'},
+    {'input': 'eshm13_edited.shp', 'output': 'data_edited.geojson', 'name': 'Edited'},
+    {'input': 'catalogue.shp', 'output': 'data_catalogue.geojson', 'name': 'Earthuakes'},
+    {'input': 'fm_above5_fixedM.shp', 'output': 'data_fm.geojson', 'name': 'Focal_mechanisms'}
+]
+
+for shapefile in shapefiles:
+    print(f"\n{'='*60}")
+    print(f"Processing: {shapefile['name']}")
+    print('='*60)
+    
+    try:
+        # Read the shapefile
+        print(f"Reading {shapefile['input']}...")
+        gdf = gpd.read_file(shapefile['input'])
+        
+        # Show basic info
+        print(f"\nTotal features: {len(gdf)}")
+        print(f"\nColumn names and types:")
+        print(gdf.dtypes)
+        print(f"\nFirst few rows:")
+        print(gdf.head())
+        
+        # Check coordinate system
+        print(f"\nCoordinate Reference System: {gdf.crs}")
+        
+        # Convert to WGS84 (EPSG:4326) for web mapping if needed
+        if gdf.crs and gdf.crs.to_epsg() != 4326:
+            print("\nConverting to WGS84 (EPSG:4326)...")
+            gdf = gdf.to_crs(epsg=4326)
+        
+        # Convert to GeoJSON
+        print(f"\nConverting to GeoJSON...")
+        gdf.to_file(shapefile['output'], driver='GeoJSON')
+        print(f"✓ Saved as '{shapefile['output']}'")
+        
+        # Show some statistics if there are numeric columns
+        print("\nNumeric column statistics:")
+        numeric_cols = gdf.select_dtypes(include=['number']).columns
+        for col in numeric_cols:
+            if col != 'geometry':
+                print(f"\n{col}:")
+                print(f"  Min: {gdf[col].min()}")
+                print(f"  Max: {gdf[col].max()}")
+                print(f"  Mean: {gdf[col].mean():.2f}")
+    
+    except Exception as e:
+        print(f"❌ Error processing {shapefile['name']}: {e}")
+
+print(f"\n{'='*60}")
+print("✓ All conversions complete!")
+print('='*60)
