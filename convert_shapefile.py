@@ -6,9 +6,9 @@ import json
 
 # List of shapefiles to convert
 shapefiles = [
-    {'input': r'shape_files\S1234567_With_MAGS_Mw_wm_2015_M4dt5_h45_200.shp', 'output': 'S1234567_With_MAGS_Mw_wm_2015_M4dt5_h45_200.geojson', 'name': 'S1234567_With_MAGS_Mw_wm_2015_M4dt5_h45_200'},
-    {'input': r'shape_files\S1234567_With_MAGS_Mw_wm_2015_M5dt0_h0_44.shp', 'output': 'S1234567_With_MAGS_Mw_wm_2015_M5dt0_h0_44.geojson', 'name': 'S1234567_With_MAGS_Mw_wm_2015_M5dt0_h0_44'},
-    {'input': r'shape_files\S1234567_With_MAGS_Mw_wm_short.shp', 'output': 'S1234567_With_MAGS_Mw_wm_short.geojson', 'name': 'S1234567_With_MAGS_Mw_wm_short'}
+    {'input': r'shape_files\EAK_Focal_Mechanisms_v20251004_normal.shp', 'output': 'EAK_Focal_Mechanisms_v20251004_normal.geojson', 'name': 'EAK_Normal_FM'},
+    {'input': r'shape_files\EAK_Focal_Mechanisms_v20251004_reverse.shp', 'output': 'EAK_Focal_Mechanisms_v20251004_reverse.geojson', 'name': 'EAK_Reverse_FM'},
+    {'input': r'shape_files\EAK_Focal_Mechanisms_v20251004_strike_slip.shp', 'output': 'EAK_Focal_Mechanisms_v20251004_strike_slip.geojson', 'name': 'EAK_Strike_Slip_FM'}
     ]
 
 for shapefile in shapefiles:

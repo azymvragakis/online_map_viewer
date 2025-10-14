@@ -333,7 +333,31 @@
         // Layer configuration
         const layerConfigs = [
             {
-                name: 'M4+ Earthquakes (200 events)',
+                name: 'Normal Fault Mechanisms',
+                file: 'EAK_Focal_Mechanisms_v20251004_normal.geojson',
+                color: '#e74c3c',  // Red for normal faults
+                visible: true,
+                zIndex: 6,  // Top layer for focal mechanisms
+                size: 3     // Line weight for polygon outlines
+            },
+            {
+                name: 'Strike-slip Fault Mechanisms',
+                file: 'EAK_Focal_Mechanisms_v20251004_strike_slip.geojson',
+                color: '#32CD32',  // lime green for strike-slip faults  
+                visible: true,
+                zIndex: 5,  // Second layer for focal mechanisms
+                size: 3     // Line weight for polygon outlines
+            },            
+            {
+                name: 'Reverse Fault Mechanisms',
+                file: 'EAK_Focal_Mechanisms_v20251004_reverse.geojson',
+                color: '#2c3e50',  // Dark blue/black for reverse faults  
+                visible: true,
+                zIndex: 4,  // Second layer for focal mechanisms
+                size: 3     // Line weight for polygon outlines
+            },
+            {
+                name: 'M4.5+ EQs (h = 45-200 km)',
                 file: 'S1234567_With_MAGS_Mw_wm_2015_M4dt5_h45_200.geojson',
                 color: '#ff6b6b',  // Red for M4+ earthquakes
                 visible: true,
@@ -341,7 +365,7 @@
                 size: 4     // Smaller circles for M4+
             },
             {
-                name: 'M5+ Earthquakes (44 events)',  
+                name: 'M5.0+ EQs (h = 0-44 km)',  
                 file: 'S1234567_With_MAGS_Mw_wm_2015_M5dt0_h0_44.geojson',
                 color: '#4ecdc4',  // Cyan for M5+ earthquakes
                 visible: true,
@@ -349,7 +373,7 @@
                 size: 6     // Medium circles for M5+
             },
             {
-                name: 'Full Earthquake Catalogue',
+                name: 'EQ catalogue (short)',
                 file: 'S1234567_With_MAGS_Mw_wm_short.geojson',
                 color: '#6c757d',  // Gray for full catalogue (background)
                 visible: true,
