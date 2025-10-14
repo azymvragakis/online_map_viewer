@@ -6,11 +6,10 @@ import json
 
 # List of shapefiles to convert
 shapefiles = [
-    {'input': 'eshm13_vanilla.shp', 'output': 'data_vanilla.geojson', 'name': 'Vanilla'},
-    {'input': 'eshm13_edited.shp', 'output': 'data_edited.geojson', 'name': 'Edited'},
-    {'input': 'catalogue.shp', 'output': 'data_catalogue.geojson', 'name': 'Earthuakes'},
-    {'input': 'fm_above5_fixedM.shp', 'output': 'data_fm.geojson', 'name': 'Focal_mechanisms'}
-]
+    {'input': r'shape_files\S1234567_With_MAGS_Mw_wm_2015_M4dt5_h45_200.shp', 'output': 'S1234567_With_MAGS_Mw_wm_2015_M4dt5_h45_200.geojson', 'name': 'S1234567_With_MAGS_Mw_wm_2015_M4dt5_h45_200'},
+    {'input': r'shape_files\S1234567_With_MAGS_Mw_wm_2015_M5dt0_h0_44.shp', 'output': 'S1234567_With_MAGS_Mw_wm_2015_M5dt0_h0_44.geojson', 'name': 'S1234567_With_MAGS_Mw_wm_2015_M5dt0_h0_44'},
+    {'input': r'shape_files\S1234567_With_MAGS_Mw_wm_short.shp', 'output': 'S1234567_With_MAGS_Mw_wm_short.geojson', 'name': 'S1234567_With_MAGS_Mw_wm_short'}
+    ]
 
 for shapefile in shapefiles:
     print(f"\n{'='*60}")
