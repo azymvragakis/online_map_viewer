@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>Multi-Layer Seismic Data Viewer v3</title>
+    <title>Multi-Layer Seismic Data Viewer v4</title>
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -335,6 +335,54 @@
     <script>
         // Layer configuration
         const layerConfigs = [
+            {
+                name: 'ESHM13 Area Sources (Edited)',
+                file: 'eshm13_edited.geojson',
+                color: '#27ae60',  // Green for ESHM13 edited zones
+                visible: false,  // Initially hidden to avoid overwhelming display
+                zIndex: 12,  // Highest z-index for newest seismic zones
+                size: 2     // Line weight for zone boundaries
+            },
+            {
+                name: 'ESHM13 Area Sources',
+                file: 'eshm13_vanilla.geojson',
+                color: '#2ecc71',  // Lighter green for ESHM13 vanilla zones
+                visible: false,  // Initially hidden
+                zIndex: 11,   // Seismic zones layer
+                size: 2     // Line weight for zone boundaries
+            },
+            {
+                name: 'ESHM20 Area Sources (Edited)',
+                file: 'eshm20_edited.geojson',
+                color: '#9b59b6',  // Purple for ESHM20 edited zones
+                visible: false,  // Initially hidden to avoid overwhelming display
+                zIndex: 10,  // High z-index for seismic zones
+                size: 2     // Line weight for zone boundaries
+            },
+            {
+                name: 'ESHM20 Area Sources',
+                file: 'eshm20_vanilla.geojson',
+                color: '#8e44ad',  // Darker purple for ESHM20 vanilla zones
+                visible: false,  // Initially hidden
+                zIndex: 9,   // Seismic zones layer
+                size: 2     // Line weight for zone boundaries
+            },
+            {
+                name: 'VAM16 Area Sources (Edited)',
+                file: 'vam16_edited.geojson',
+                color: '#f39c12',  // Orange for VAM16 edited zones
+                visible: false,  // Initially hidden
+                zIndex: 8,   // Seismic zones layer
+                size: 2     // Line weight for zone boundaries
+            },
+            {
+                name: 'VAM16 Area Sources',
+                file: 'vam16_vanilla.geojson',
+                color: '#d35400',  // Darker orange for VAM16 vanilla zones
+                visible: false,  // Initially hidden
+                zIndex: 7,   // Seismic zones layer
+                size: 2     // Line weight for zone boundaries
+            },
             {
                 name: 'Normal Fault Mechanisms',
                 file: 'EAK_Focal_Mechanisms_v20251004_normal.geojson',

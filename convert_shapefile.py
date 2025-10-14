@@ -6,9 +6,12 @@ import json
 
 # List of shapefiles to convert
 shapefiles = [
-    {'input': r'shape_files\EAK_Focal_Mechanisms_v20251004_normal.shp', 'output': 'EAK_Focal_Mechanisms_v20251004_normal.geojson', 'name': 'EAK_Normal_FM'},
-    {'input': r'shape_files\EAK_Focal_Mechanisms_v20251004_reverse.shp', 'output': 'EAK_Focal_Mechanisms_v20251004_reverse.geojson', 'name': 'EAK_Reverse_FM'},
-    {'input': r'shape_files\EAK_Focal_Mechanisms_v20251004_strike_slip.shp', 'output': 'EAK_Focal_Mechanisms_v20251004_strike_slip.geojson', 'name': 'EAK_Strike_Slip_FM'}
+    {'input': r'shape_files\eshm13_edited.shp', 'output': 'eshm13_edited.geojson', 'name': 'ESHM13_edited'},
+    {'input': r'shape_files\eshm20_edited.shp', 'output': 'eshm20_edited.geojson', 'name': 'ESHM20_edited'},
+    {'input': r'shape_files\vam16_edited.shp', 'output': 'vam16_edited.geojson', 'name': 'VAM16_edited'},
+    {'input': r'shape_files\eshm13_vanilla.shp', 'output': 'eshm13_vanilla.geojson', 'name': 'ESHM13_vanilla'},
+    {'input': r'shape_files\eshm20_vanilla.shp', 'output': 'eshm20_vanilla.geojson', 'name': 'ESHM20_vanilla'},
+    {'input': r'shape_files\vam16_vanilla.shp', 'output': 'vam16_vanilla.geojson', 'name': 'VAM16_vanilla'}
     ]
 
 for shapefile in shapefiles:
