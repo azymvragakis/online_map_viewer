@@ -254,10 +254,155 @@
             color: #495057;
             width: 40%;
         }
+
+        /* Multi-Filter Styles */
+        .filter-row {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        /* Searchable Dropdown Styles */
+        .searchable-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .searchable-dropdown input {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .searchable-dropdown-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .searchable-dropdown-item {
+            padding: 6px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .searchable-dropdown-item:hover {
+            background: #e7f3ff;
+        }
+
+        .searchable-dropdown-item.selected {
+            background: #007bff;
+            color: white;
+        }
+
+        .searchable-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .filter-row:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+        }
+
+        .filter-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .filter-row-number {
+            background: #007bff;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .filter-remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-remove-btn:hover {
+            background: #c82333;
+        }
+
+        .filter-control-group {
+            margin-bottom: 8px;
+        }
+
+        .filter-control-group label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #495057;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .filter-control-group select,
+        .filter-control-group input {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .range-inputs {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .range-inputs input {
+            flex: 1;
+        }
+
+        .range-separator {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        /* Loading spinner animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         
         @media (max-width: 768px) {
             #sidebar {
-                width: 250px;
+                width: 280px;
             }
         }
     </style>
@@ -270,48 +415,84 @@
         </div>
         
         <div class="sidebar-section">
-            <h2>Filter Active Layer</h2>
+            <h2>🔍 Multi-Attribute Filter</h2>
             <div id="active-layer-indicator" style="padding: 10px; background: #fff3cd; border: 2px solid #ffc107; border-radius: 6px; margin-bottom: 15px; font-weight: 600; color: #856404; text-align: center;">
                 Click a layer to select it first
             </div>
-            <div class="control-group" style="flex-direction: column; align-items: stretch;">
-                <label for="filterColumn">Column:</label>
-                <select id="filterColumn">
-                    <option value="">-- Select --</option>
+            
+            <!-- Filter Logic Selection -->
+            <div style="margin-bottom: 15px;">
+                <label style="font-size: 12px; font-weight: 600; color: #495057; display: block; margin-bottom: 5px;">Filter Logic:</label>
+                <select id="filterLogic" style="width: 100%; padding: 6px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
+                    <option value="AND">All conditions must match (AND)</option>
+                    <option value="OR">Any condition can match (OR)</option>
                 </select>
             </div>
-            <div class="control-group" style="flex-direction: column; align-items: stretch; margin-top: 10px;">
-                <label for="filterOperator">Operator:</label>
-                <select id="filterOperator" onchange="updateValueInput()">
-                    <option value=">=">&gt;=</option>
-                    <option value="<=">&lt;=</option>
-                    <option value="=">=</option>
-                    <option value=">">&gt;</option>
-                    <option value="<">&lt;</option>
-                </select>
+
+            <!-- Dynamic Filter Container -->
+            <div id="multiFilterContainer" style="margin-bottom: 15px;">
+                <!-- Filter rows will be dynamically added here -->
             </div>
-            <div class="control-group" style="flex-direction: column; align-items: stretch; margin-top: 10px;">
-                <label for="filterValue">Value:</label>
-                <input type="number" id="filterValue" step="any" placeholder="Enter value" style="display: none; width: 100%; padding: 6px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
-                <select id="filterValueSelect" style="display: none; width: 100%; padding: 6px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
-                    <option value="">-- Select Value --</option>
-                </select>
-                <input type="text" id="filterValueText" placeholder="Enter value" style="display: none; width: 100%; padding: 6px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
+
+            <!-- Add Filter Button -->
+            <div style="margin-bottom: 15px;">
+                <button onclick="addFilterRow()" style="width: 100%; padding: 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    ➕ Add Filter Condition
+                </button>
             </div>
-            <div class="control-group" style="margin-top: 15px; align-items: center;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+
+            <!-- Filter Options -->
+            <div style="margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
                     <input type="checkbox" id="hideNonFiltered" style="width: auto; cursor: pointer;">
                     <span style="font-size: 13px;">Hide non-matching features</span>
                 </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="showFilterSummary" checked style="width: auto; cursor: pointer;">
+                    <span style="font-size: 13px;">Show filter summary</span>
+                </label>
             </div>
-            <div style="margin-top: 15px; display: flex; gap: 8px;">
-                <button onclick="applyFilter()" style="flex: 1; padding: 8px;">Apply</button>
-                <button onclick="resetFilter()" style="flex: 1; padding: 8px; background: #6c757d;">Reset</button>
-            </div>
-            <div style="margin-top: 8px;">
-                <button onclick="flashFilteredFeatures()" style="width: 100%; padding: 8px; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
-                    Flash Filtered Features
+
+            <!-- Filter Actions -->
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <button onclick="applyMultiFilter()" style="flex: 1; padding: 8px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                    Apply Filters
                 </button>
+                <button onclick="previewFilter()" style="flex: 1; padding: 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 12px;">
+                    Preview (1K Sample)
+                </button>
+                <button onclick="resetAllFilters()" style="flex: 1; padding: 8px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                    Reset All
+                </button>
+            </div>
+
+            <!-- Quick Actions -->
+            <div style="display: flex; gap: 8px;">
+                <button onclick="flashFilteredFeatures()" style="flex: 1; padding: 8px; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 12px;">
+                    Flash Results
+                </button>
+            </div>
+
+            <!-- Performance Warning -->
+            <div id="performanceWarning" style="display: none; margin-top: 10px; padding: 8px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; font-size: 12px;">
+                <strong>⚠️ Large Dataset:</strong> Use "Preview" first to test filters on a sample before applying to all data.
+            </div>
+
+            <!-- Loading Indicator with Stop Button -->
+            <div id="filterLoadingIndicator" style="display: none; margin-top: 15px; padding: 10px; background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 4px; text-align: center;">
+                <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #007bff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-right: 10px;"></div>
+                <span style="color: #004085; font-weight: 600;">Processing filters...</span>
+                <div style="margin-top: 10px;">
+                    <button id="stopFilteringBtn" onclick="stopFiltering()" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                        ⏹️ Stop Filtering
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Summary -->
+            <div id="filterSummary" style="display: none; margin-top: 15px; padding: 10px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px;">
+                <div style="font-size: 12px; font-weight: 600; color: #0c5460; margin-bottom: 5px;">Active Filters:</div>
+                <div id="filterSummaryContent" style="font-size: 11px; color: #0c5460;"></div>
             </div>
         </div>
     </div>
@@ -327,6 +508,126 @@
         </div>
         
         <div id="map"></div>
+        
+        <!-- Draggable Legend -->
+        <div id="mapLegend" style="
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            max-width: 300px;
+            max-height: 500px;
+            z-index: 10000;
+            display: none;
+            cursor: move;
+        ">
+            <div id="legendHeader" style="
+                background: #f8f9fa;
+                padding: 8px 12px;
+                border-bottom: 1px solid #ddd;
+                border-radius: 6px 6px 0 0;
+                font-weight: bold;
+                color: #333;
+                cursor: move;
+                user-select: none;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <span>Legend</span>
+                <button onclick="closeLegend()" style="
+                    background: none;
+                    border: none;
+                    font-size: 16px;
+                    color: #666;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">×</button>
+            </div>
+            <div id="legendContent" style="
+                padding: 12px;
+                max-height: 400px;
+                overflow-y: auto;
+            "></div>
+        </div>
+        
+        <script>
+            // Make legend draggable
+            function makeLegendDraggable() {
+                const legend = document.getElementById('mapLegend');
+                const header = document.getElementById('legendHeader');
+                let isDragging = false;
+                let currentX;
+                let currentY;
+                let initialX;
+                let initialY;
+                let xOffset = 0;
+                let yOffset = 0;
+
+                function dragStart(e) {
+                    if (e.target === header || header.contains(e.target)) {
+                        if (e.target.tagName === 'BUTTON') return; // Don't drag when clicking close button
+                        
+                        if (e.type === "touchstart") {
+                            initialX = e.touches[0].clientX - xOffset;
+                            initialY = e.touches[0].clientY - yOffset;
+                        } else {
+                            initialX = e.clientX - xOffset;
+                            initialY = e.clientY - yOffset;
+                        }
+
+                        if (e.target === header || header.contains(e.target)) {
+                            isDragging = true;
+                        }
+                    }
+                }
+
+                function dragEnd() {
+                    initialX = currentX;
+                    initialY = currentY;
+                    isDragging = false;
+                }
+
+                function drag(e) {
+                    if (isDragging) {
+                        e.preventDefault();
+                        
+                        if (e.type === "touchmove") {
+                            currentX = e.touches[0].clientX - initialX;
+                            currentY = e.touches[0].clientY - initialY;
+                        } else {
+                            currentX = e.clientX - initialX;
+                            currentY = e.clientY - initialY;
+                        }
+
+                        xOffset = currentX;
+                        yOffset = currentY;
+
+                        legend.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                    }
+                }
+
+                header.addEventListener("mousedown", dragStart);
+                document.addEventListener("mousemove", drag);
+                document.addEventListener("mouseup", dragEnd);
+
+                header.addEventListener("touchstart", dragStart);
+                document.addEventListener("touchmove", drag);
+                document.addEventListener("touchend", dragEnd);
+            }
+
+            // Initialize draggable legend when page loads
+            document.addEventListener('DOMContentLoaded', makeLegendDraggable);
+        </script>
     </div>
     
     <!-- Leaflet JS -->
@@ -340,48 +641,48 @@
                 file: 'eshm13_edited.geojson',
                 color: '#27ae60',  // Green for ESHM13 edited zones
                 visible: false,  // Initially hidden to avoid overwhelming display
-                zIndex: 12,  // Highest z-index for newest seismic zones
-                size: 2     // Line weight for zone boundaries
+                zIndex: -2,  // Below all data layers (background seismic zones)
+                size: 3     // Line weight for zone boundaries (boundaries only)
             },
             {
                 name: 'ESHM13 Area Sources',
                 file: 'eshm13_vanilla.geojson',
                 color: '#2ecc71',  // Lighter green for ESHM13 vanilla zones
                 visible: false,  // Initially hidden
-                zIndex: 11,   // Seismic zones layer
-                size: 2     // Line weight for zone boundaries
+                zIndex: -3,   // Below all data layers (background seismic zones)
+                size: 3     // Line weight for zone boundaries (boundaries only)
             },
             {
                 name: 'ESHM20 Area Sources (Edited)',
                 file: 'eshm20_edited.geojson',
                 color: '#9b59b6',  // Purple for ESHM20 edited zones
                 visible: false,  // Initially hidden to avoid overwhelming display
-                zIndex: 10,  // High z-index for seismic zones
-                size: 2     // Line weight for zone boundaries
+                zIndex: -4,  // Below all data layers (background seismic zones)
+                size: 3     // Line weight for zone boundaries (boundaries only)
             },
             {
                 name: 'ESHM20 Area Sources',
                 file: 'eshm20_vanilla.geojson',
                 color: '#8e44ad',  // Darker purple for ESHM20 vanilla zones
                 visible: false,  // Initially hidden
-                zIndex: 9,   // Seismic zones layer
-                size: 2     // Line weight for zone boundaries
+                zIndex: -5,   // Below all data layers (background seismic zones)
+                size: 3     // Line weight for zone boundaries (boundaries only)
             },
             {
                 name: 'VAM16 Area Sources (Edited)',
                 file: 'vam16_edited.geojson',
                 color: '#f39c12',  // Orange for VAM16 edited zones
                 visible: false,  // Initially hidden
-                zIndex: 8,   // Seismic zones layer
-                size: 2     // Line weight for zone boundaries
+                zIndex: -6,   // Below all data layers (background seismic zones)
+                size: 3     // Line weight for zone boundaries (boundaries only)
             },
             {
                 name: 'VAM16 Area Sources',
                 file: 'vam16_vanilla.geojson',
                 color: '#d35400',  // Darker orange for VAM16 vanilla zones
                 visible: false,  // Initially hidden
-                zIndex: 7,   // Seismic zones layer
-                size: 2     // Line weight for zone boundaries
+                zIndex: -7,   // Below all data layers (background seismic zones)
+                size: 3     // Line weight for zone boundaries (boundaries only)
             },
             {
                 name: 'Normal Fault Mechanisms',
@@ -427,7 +728,7 @@
                 name: 'EQ catalogue (short)',
                 file: 'S1234567_With_MAGS_Mw_wm_short.geojson',
                 color: '#6c757d',  // Gray for full catalogue (background)
-                visible: true,
+                visible: false,
                 zIndex: 1,  // Bottom layer (largest dataset)
                 size: 2     // Very small circles for background data
             }
@@ -448,6 +749,8 @@
         // Store layers
         let layers = {};
         let activeLayerId = null;
+        let activeFilteringWorkers = []; // Track active Web Workers
+        let isFilteringActive = false; // Track filtering state
         
         // Function to show all feature details in a modal
         window.showFeatureDetails = function(layerId, properties) {
@@ -530,7 +833,8 @@
                         data: data,
                         originalData: JSON.parse(JSON.stringify(data)),
                         leafletLayer: null,
-                        opacity: initialOpacity
+                        opacity: initialOpacity,
+                        showInLegend: false // Default to not showing in legend
                     };
                     
                     createLayer(index);
@@ -541,6 +845,10 @@
                         updateInfo();
                         fitMapToLayers();
                         updateActiveLayerIndicator();
+                        
+                        // Make legend functions globally available
+                        window.showLegendForLayer = showLegendForLayer;
+                        window.closeLegend = closeLegend;
                         
                         // Debug info - log layer details to console
                         console.log('All layers loaded successfully:');
@@ -567,36 +875,100 @@
             // Check if we should hide non-filtered features
             const hideNonFiltered = document.getElementById('hideNonFiltered')?.checked || false;
             
-            // Function to check if a feature matches the filter
+            // Function to check if a feature matches the filter (supports both legacy and multi-filter)
             const featureMatchesFilter = (feature) => {
-                if (!layer.isFiltered) return false;
-                
-                const propValue = feature.properties[layer.filterColumn];
-                
-                if (layer.filterColumnType === 'number') {
-                    const numValue = parseFloat(layer.filterValue);
-                    switch(layer.filterOperator) {
-                        case '>=': return propValue >= numValue;
-                        case '<=': return propValue <= numValue;
-                        case '=': return propValue === numValue;
-                        case '>': return propValue > numValue;
-                        case '<': return propValue < numValue;
-                        default: return false;
-                    }
-                } else {
-                    // String comparison (exact match)
-                    return propValue === layer.filterValue;
+                if (!layer.isFiltered) {
+                    console.log(`[DEBUG] Layer ${layerId} is not filtered, returning false`);
+                    return false;
                 }
+                
+                // Multi-filter system
+                if (layer.filterType === 'multi' && layer.multiFilterResults) {
+                    // Find matching feature by comparing properties instead of object reference
+                    let matchingResultIndex = -1;
+                    for (let i = 0; i < layer.multiFilterResults.length; i++) {
+                        const resultFeature = layer.multiFilterResults[i].feature;
+                        
+                        // Compare all properties to find matching feature
+                        const props1 = resultFeature.properties;
+                        const props2 = feature.properties;
+                        const keys1 = Object.keys(props1);
+                        const keys2 = Object.keys(props2);
+                        
+                        if (keys1.length === keys2.length && keys1.every(key => props1[key] === props2[key])) {
+                            matchingResultIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (matchingResultIndex >= 0) {
+                        const matches = layer.multiFilterResults[matchingResultIndex].matches;
+                        console.log(`[DEBUG] Multi-filter check for feature at result index ${matchingResultIndex}:`, feature.properties, `matches: ${matches}`);
+                        return matches;
+                    } else {
+                        console.log(`[DEBUG] WARNING: No matching feature found in multiFilterResults for:`, feature.properties);
+                        // Default to showing the feature if we can't find a match (safer fallback)
+                        return true;
+                    }
+                }
+                
+                // Legacy single filter system (kept for backward compatibility)
+                if (layer.filterColumn && layer.filterValue !== undefined) {
+                    const propValue = feature.properties[layer.filterColumn];
+                    console.log(`[DEBUG] Legacy filter check - Column: "${layer.filterColumn}", PropValue: "${propValue}", FilterValue: "${layer.filterValue}", Type: "${layer.filterColumnType}"`);
+                    
+                    if (layer.filterColumnType === 'number') {
+                        const numValue = parseFloat(layer.filterValue);
+                        const numProp = parseFloat(propValue);
+                        let matches = false;
+                        
+                        switch(layer.filterOperator) {
+                            case '>=': matches = numProp >= numValue; break;
+                            case '<=': matches = numProp <= numValue; break;
+                            case '=': matches = numProp === numValue; break;
+                            case '>': matches = numProp > numValue; break;
+                            case '<': matches = numProp < numValue; break;
+                            default: matches = false;
+                        }
+                        console.log(`[DEBUG] Numeric comparison: ${numProp} ${layer.filterOperator} ${numValue} = ${matches}`);
+                        return matches;
+                    } else {
+                        // String comparison (exact match)
+                        const matches = String(propValue) === String(layer.filterValue);
+                        console.log(`[DEBUG] String comparison: "${String(propValue)}" === "${String(layer.filterValue)}" = ${matches}`);
+                        return matches;
+                    }
+                }
+                
+                console.log(`[DEBUG] No valid filter found, returning false`);
+                return false;
             };
             
             // Determine which features to show
             let dataToRender = layer.data;
+            console.log(`[DEBUG] Original features count: ${layer.data.features.length}`);
+            console.log(`[DEBUG] Layer filtered: ${layer.isFiltered}, Hide non-filtered: ${hideNonFiltered}`);
+            
             if (layer.isFiltered && hideNonFiltered) {
                 // Filter out non-matching features completely
+                const filteredFeatures = layer.data.features.filter(featureMatchesFilter);
+                console.log(`[DEBUG] Filtered features count: ${filteredFeatures.length}`);
+                
                 dataToRender = {
                     type: 'FeatureCollection',
-                    features: layer.data.features.filter(featureMatchesFilter)
+                    features: filteredFeatures
                 };
+                
+                if (filteredFeatures.length === 0) {
+                    console.warn(`[WARNING] No features match the filter! Check filter criteria.`);
+                    console.log(`[DEBUG] Filter details:`, {
+                        filterType: layer.filterType,
+                        filterColumn: layer.filterColumn,
+                        filterValue: layer.filterValue,
+                        filterOperator: layer.filterOperator,
+                        multiFilterResults: layer.multiFilterResults?.length
+                    });
+                }
             }
             
             // Detect if this is a large dataset (>10,000 features)
@@ -614,12 +986,32 @@
                         baseColor = layer.colorByAttribute.mappings[attrValue] || layer.config.color;
                     }
                     
+                    // Calculate size: use attribute-based size if enabled, otherwise use layer size
+                    let calculatedSize = layer.config.size || 6;
+                    if (layer.sizeByAttribute?.enabled && layer.sizeByAttribute?.column && 
+                        layer.sizeByAttribute?.minValue !== undefined && layer.sizeByAttribute?.maxValue !== undefined &&
+                        layer.sizeByAttribute?.minSize !== undefined && layer.sizeByAttribute?.maxSize !== undefined) {
+                        
+                        const attrValue = parseFloat(feature.properties[layer.sizeByAttribute.column]);
+                        if (!isNaN(attrValue)) {
+                            // Linear interpolation between min/max values to min/max sizes
+                            const valueRange = layer.sizeByAttribute.maxValue - layer.sizeByAttribute.minValue;
+                            const sizeRange = layer.sizeByAttribute.maxSize - layer.sizeByAttribute.minSize;
+                            
+                            if (valueRange > 0) {
+                                const normalizedValue = (attrValue - layer.sizeByAttribute.minValue) / valueRange;
+                                calculatedSize = layer.sizeByAttribute.minSize + (normalizedValue * sizeRange);
+                                calculatedSize = Math.max(layer.sizeByAttribute.minSize, Math.min(layer.sizeByAttribute.maxSize, calculatedSize));
+                            }
+                        }
+                    }
+                    
                     // Use flash color/size if flashing, otherwise use normal colors
                     // Filtered features (highlighted) always use aqua or flash color (overrides attribute color)
                     const highlightColor = layer.flashColor || '#00ffff';
                     const color = isHighlighted ? highlightColor : baseColor;
                     const opacity = isHighlighted ? layer.opacity : layer.opacity * 0.4;
-                    const baseSize = layer.config.size || 6;
+                    const baseSize = calculatedSize;
                     const highlightSize = layer.flashSize || (baseSize + 2);
                     
                     return L.circleMarker(latlng, {
@@ -643,20 +1035,57 @@
                             baseColor = layer.colorByAttribute.mappings[attrValue] || layer.config.color;
                         }
                         
+                        // Calculate size: use attribute-based size if enabled, otherwise use layer size
+                        let calculatedSize = layer.config.size || 6;
+                        if (layer.sizeByAttribute?.enabled && layer.sizeByAttribute?.column && 
+                            layer.sizeByAttribute?.minValue !== undefined && layer.sizeByAttribute?.maxValue !== undefined &&
+                            layer.sizeByAttribute?.minSize !== undefined && layer.sizeByAttribute?.maxSize !== undefined) {
+                            
+                            const attrValue = parseFloat(feature.properties[layer.sizeByAttribute.column]);
+                            if (!isNaN(attrValue)) {
+                                // Linear interpolation between min/max values to min/max sizes
+                                const valueRange = layer.sizeByAttribute.maxValue - layer.sizeByAttribute.minValue;
+                                const sizeRange = layer.sizeByAttribute.maxSize - layer.sizeByAttribute.minSize;
+                                
+                                if (valueRange > 0) {
+                                    const normalizedValue = (attrValue - layer.sizeByAttribute.minValue) / valueRange;
+                                    calculatedSize = layer.sizeByAttribute.minSize + (normalizedValue * sizeRange);
+                                    calculatedSize = Math.max(layer.sizeByAttribute.minSize, Math.min(layer.sizeByAttribute.maxSize, calculatedSize));
+                                }
+                            }
+                        }
+                        
                         // Use flash color/size if flashing, otherwise use normal colors
                         // Filtered features (highlighted) always use aqua or flash color (overrides attribute color)
                         const highlightColor = layer.flashColor || '#00ffff';
                         const color = isHighlighted ? highlightColor : baseColor;
                         const opacity = isHighlighted ? layer.opacity : layer.opacity * 0.4; // Dim non-filtered
-                        const baseSize = layer.config.size || 6;
+                        const baseSize = calculatedSize;
                         const highlightSize = layer.flashSize || baseSize;
                         
-                        return {
-                            color: color,
-                            weight: isHighlighted ? highlightSize : Math.max(1, baseSize - 1),
-                            opacity: opacity,
-                            fillOpacity: opacity * 0.5
-                        };
+                        // Check if this is a seismic zone layer (boundaries only)
+                        const isBoundaryLayer = layer.config.name.includes('ESHM13') || 
+                                              layer.config.name.includes('ESHM20') || 
+                                              layer.config.name.includes('VAM16');
+                        
+                        if (isBoundaryLayer) {
+                            // For seismic zone layers: show only boundaries, no fill
+                            return {
+                                color: color,
+                                weight: isHighlighted ? highlightSize : baseSize,
+                                opacity: opacity,
+                                fillOpacity: 0, // No fill for boundary layers
+                                fill: false     // Explicitly disable fill
+                            };
+                        } else {
+                            // For other layers: normal styling with fill
+                            return {
+                                color: color,
+                                weight: isHighlighted ? highlightSize : Math.max(1, baseSize - 1),
+                                opacity: opacity,
+                                fillOpacity: opacity * 0.5
+                            };
+                        }
                     }
                 },
                 onEachFeature: function(feature, leafletLayer) {
@@ -859,6 +1288,78 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Size by Attribute Section -->
+                    <div style="margin-left: 32px; margin-top: 10px; padding: 10px; background: #d1ecf1; border-radius: 4px; border: 1px solid #0c5460;" onclick="event.stopPropagation()">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <input type="checkbox" id="sizeByAttr_${layerId}" onchange="toggleSizeByAttribute(${layerId}, this.checked)" 
+                                   ${layer.sizeByAttribute?.enabled ? 'checked' : ''}
+                                   style="width: auto; cursor: pointer;">
+                            <label style="font-size: 12px; font-weight: 600; color: #0c5460; cursor: pointer;" 
+                                   for="sizeByAttr_${layerId}">Size by Attribute</label>
+                        </div>
+                        
+                        <div id="sizeByAttrPanel_${layerId}" style="display: ${layer.sizeByAttribute?.enabled ? 'block' : 'none'};">
+                            <div style="margin-bottom: 8px;">
+                                <label style="font-size: 11px; color: #0c5460; display: block; margin-bottom: 4px;">Numeric Attribute:</label>
+                                <select id="sizeAttrColumn_${layerId}" onchange="updateSizeAttributeRange(${layerId})" 
+                                        style="width: 100%; padding: 4px; font-size: 12px; border: 1px solid #0c5460; border-radius: 4px;">
+                                    <option value="">-- Select Column --</option>
+                                </select>
+                            </div>
+                            
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 11px; color: #0c5460; display: block; margin-bottom: 4px;">Min Value:</label>
+                                    <input type="number" id="sizeMinValue_${layerId}" placeholder="Auto" step="any"
+                                           style="width: 100%; padding: 4px; font-size: 12px; border: 1px solid #0c5460; border-radius: 4px;">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 11px; color: #0c5460; display: block; margin-bottom: 4px;">Max Value:</label>
+                                    <input type="number" id="sizeMaxValue_${layerId}" placeholder="Auto" step="any"
+                                           style="width: 100%; padding: 4px; font-size: 12px; border: 1px solid #0c5460; border-radius: 4px;">
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 11px; color: #0c5460; display: block; margin-bottom: 4px;">Min Size (px):</label>
+                                    <input type="number" id="sizeMinSize_${layerId}" value="3" min="1" max="50"
+                                           style="width: 100%; padding: 4px; font-size: 12px; border: 1px solid #0c5460; border-radius: 4px;">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 11px; color: #0c5460; display: block; margin-bottom: 4px;">Max Size (px):</label>
+                                    <input type="number" id="sizeMaxSize_${layerId}" value="15" min="1" max="50"
+                                           style="width: 100%; padding: 4px; font-size: 12px; border: 1px solid #0c5460; border-radius: 4px;">
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="preserveColor_${layerId}" checked 
+                                           style="width: auto; cursor: pointer;">
+                                    <label style="font-size: 11px; color: #0c5460; cursor: pointer;" 
+                                           for="preserveColor_${layerId}">Preserve existing color styling</label>
+                                </div>
+                            </div>
+                            
+                            <button onclick="applySizeByAttribute(${layerId})" 
+                                    style="width: 100%; padding: 6px; background: #0c5460; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                                Apply Size Scaling
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Show Legend Section -->
+                    <div style="margin-left: 32px; margin-top: 10px; padding: 8px; background: #e7f3ff; border-radius: 4px; border: 1px solid #0066cc;" onclick="event.stopPropagation()">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="showLegend_${layerId}" onchange="toggleShowLegend(${layerId}, this.checked)"
+                                   ${layer.showInLegend ? 'checked' : ''}
+                                   style="width: auto; cursor: pointer;">
+                            <label style="font-size: 12px; font-weight: 600; color: #0066cc; cursor: pointer;" 
+                                   for="showLegend_${layerId}">Show in Legend</label>
+                        </div>
+                    </div>
                 `;
                 
                 container.appendChild(div);
@@ -889,8 +1390,23 @@
         function setActiveLayer(layerId) {
             activeLayerId = layerId;
             renderLayerList();
-            populateFilterOptions();
+            populateFilterOptions(); // Keep for legacy compatibility
             updateActiveLayerIndicator();
+            
+            // Show performance warning for large datasets
+            const performanceWarning = document.getElementById('performanceWarning');
+            const layer = layers[layerId];
+            if (performanceWarning && layer) {
+                const featureCount = layer.originalData?.features?.length || 0;
+                if (featureCount > 50000) {
+                    performanceWarning.style.display = 'block';
+                } else {
+                    performanceWarning.style.display = 'none';
+                }
+            }
+            
+            // Initialize multi-filter system for the new active layer
+            initializeMultiFilter();
         }
         
         // Update the active layer indicator
@@ -963,6 +1479,166 @@
                 createLayer(layerId);
             }
         }
+
+        function toggleSizeByAttribute(layerId, enabled) {
+            const layer = layers[layerId];
+            if (!layer.sizeByAttribute) {
+                layer.sizeByAttribute = {};
+            }
+            layer.sizeByAttribute.enabled = enabled;
+            
+            const panel = document.getElementById(`sizeByAttrPanel_${layerId}`);
+            if (panel) {
+                panel.style.display = enabled ? 'block' : 'none';
+            }
+            
+            if (enabled) {
+                populateSizeAttributeColumns(layerId);
+            } else {
+                // Clear size by attribute
+                layer.sizeByAttribute.column = null;
+                layer.sizeByAttribute.minValue = null;
+                layer.sizeByAttribute.maxValue = null;
+                layer.sizeByAttribute.minSize = null;
+                layer.sizeByAttribute.maxSize = null;
+                createLayer(layerId);
+            }
+        }
+
+        function toggleShowLegend(layerId, enabled) {
+            if (enabled) {
+                showLegendForLayer(layerId);
+            } else {
+                removeLegendForLayer(layerId);
+            }
+        }
+        
+        function removeLegendForLayer(layerId) {
+            const existingEntry = document.getElementById(`legendEntry_${layerId}`);
+            if (existingEntry) {
+                existingEntry.remove();
+            }
+            
+            // Check if legend is now empty
+            const contentDiv = document.getElementById('legendContent');
+            const legendDiv = document.getElementById('mapLegend');
+            
+            if (contentDiv && legendDiv) {
+                if (contentDiv.children.length === 0) {
+                    legendDiv.style.display = 'none';
+                }
+            }
+        }
+
+        // Color Ramp System
+        const colorRamps = {
+            'red-green': [
+                { stop: 0, color: '#d73027' },
+                { stop: 0.25, color: '#fc8d59' },
+                { stop: 0.5, color: '#fee08b' },
+                { stop: 0.75, color: '#d9ef8b' },
+                { stop: 1, color: '#91bfdb' }
+            ],
+            'blue-red': [
+                { stop: 0, color: '#2166ac' },
+                { stop: 0.25, color: '#67a9cf' },
+                { stop: 0.5, color: '#f7f7f7' },
+                { stop: 0.75, color: '#fddbc7' },
+                { stop: 1, color: '#d6604d' }
+            ],
+            'viridis': [
+                { stop: 0, color: '#440154' },
+                { stop: 0.25, color: '#31688e' },
+                { stop: 0.5, color: '#35b779' },
+                { stop: 0.75, color: '#fde725' },
+                { stop: 1, color: '#fde725' }
+            ],
+            'plasma': [
+                { stop: 0, color: '#0d0887' },
+                { stop: 0.25, color: '#7e03a8' },
+                { stop: 0.5, color: '#cc4778' },
+                { stop: 0.75, color: '#f89441' },
+                { stop: 1, color: '#f0f921' }
+            ],
+            'grayscale': [
+                { stop: 0, color: '#000000' },
+                { stop: 0.33, color: '#555555' },
+                { stop: 0.66, color: '#aaaaaa' },
+                { stop: 1, color: '#ffffff' }
+            ],
+            'rainbow': [
+                { stop: 0, color: '#9400d3' },
+                { stop: 0.16, color: '#0000ff' },
+                { stop: 0.33, color: '#00ff00' },
+                { stop: 0.5, color: '#ffff00' },
+                { stop: 0.66, color: '#ff7f00' },
+                { stop: 1, color: '#ff0000' }
+            ]
+        };
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + [r, g, b].map(x => {
+                const hex = Math.round(x).toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+            }).join("");
+        }
+
+        function interpolateColor(color1, color2, factor) {
+            const rgb1 = hexToRgb(color1);
+            const rgb2 = hexToRgb(color2);
+            
+            const r = rgb1.r + factor * (rgb2.r - rgb1.r);
+            const g = rgb1.g + factor * (rgb2.g - rgb1.g);
+            const b = rgb1.b + factor * (rgb2.b - rgb1.b);
+            
+            return rgbToHex(r, g, b);
+        }
+
+        function getColorFromRamp(rampName, value, minValue, maxValue) {
+            const ramp = colorRamps[rampName];
+            if (!ramp) return '#cccccc';
+            
+            // Normalize value to 0-1 range
+            const normalizedValue = (value - minValue) / (maxValue - minValue);
+            const clampedValue = Math.max(0, Math.min(1, normalizedValue));
+            
+            // Find the two stops to interpolate between
+            let lowerStop = ramp[0];
+            let upperStop = ramp[ramp.length - 1];
+            
+            for (let i = 0; i < ramp.length - 1; i++) {
+                if (clampedValue >= ramp[i].stop && clampedValue <= ramp[i + 1].stop) {
+                    lowerStop = ramp[i];
+                    upperStop = ramp[i + 1];
+                    break;
+                }
+            }
+            
+            // Calculate interpolation factor
+            const factor = (clampedValue - lowerStop.stop) / (upperStop.stop - lowerStop.stop);
+            
+            return interpolateColor(lowerStop.color, upperStop.color, factor);
+        }
+
+        function isNumericColumn(layerId, column) {
+            const layer = layers[layerId];
+            const values = layer.originalData.features
+                .map(f => f.properties[column])
+                .filter(v => v !== null && v !== undefined);
+            
+            // Check if at least 80% of values are numeric
+            const numericCount = values.filter(v => !isNaN(parseFloat(v)) && isFinite(parseFloat(v))).length;
+            return numericCount / values.length >= 0.8;
+        }
         
         // Populate attribute columns for color by attribute
         function populateAttributeColumns(layerId) {
@@ -991,6 +1667,79 @@
                 updateAttributeValues(layerId);
             }
         }
+
+        // Populate numeric attribute columns for size by attribute
+        function populateSizeAttributeColumns(layerId) {
+            const layer = layers[layerId];
+            const select = document.getElementById(`sizeAttrColumn_${layerId}`);
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">-- Select Column --</option>';
+            
+            // Get all columns from first feature and filter numeric ones
+            const firstFeature = layer.originalData.features[0];
+            if (!firstFeature) return;
+            
+            Object.keys(firstFeature.properties).forEach(key => {
+                // Check if column contains numeric values by sampling a few features
+                const sampleValues = layer.originalData.features
+                    .slice(0, 10) // Sample first 10 features
+                    .map(f => f.properties[key])
+                    .filter(v => v !== null && v !== undefined);
+                
+                const isNumeric = sampleValues.length > 0 && 
+                    sampleValues.every(v => !isNaN(parseFloat(v)) && isFinite(v));
+                
+                if (isNumeric) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = key;
+                    if (layer.sizeByAttribute?.column === key) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                }
+            });
+            
+            // If a column is already selected, populate range
+            if (layer.sizeByAttribute?.column) {
+                updateSizeAttributeRange(layerId);
+            }
+        }
+
+        // Update size attribute range based on selected column
+        function updateSizeAttributeRange(layerId) {
+            const layer = layers[layerId];
+            const select = document.getElementById(`sizeAttrColumn_${layerId}`);
+            const column = select.value;
+            
+            if (!column) return;
+            
+            // Get all values for this column
+            const values = layer.originalData.features
+                .map(f => f.properties[column])
+                .filter(v => v !== null && v !== undefined && !isNaN(parseFloat(v)))
+                .map(v => parseFloat(v));
+            
+            if (values.length === 0) return;
+            
+            // Calculate min and max
+            const minValue = Math.min(...values);
+            const maxValue = Math.max(...values);
+            
+            // Update input placeholders with actual range
+            const minInput = document.getElementById(`sizeMinValue_${layerId}`);
+            const maxInput = document.getElementById(`sizeMaxValue_${layerId}`);
+            
+            if (minInput) {
+                minInput.placeholder = minValue.toString();
+                if (!minInput.value) minInput.value = minValue;
+            }
+            if (maxInput) {
+                maxInput.placeholder = maxValue.toString();
+                if (!maxInput.value) maxInput.value = maxValue;
+            }
+        }
         
         // Update attribute values and create color mappings
         function updateAttributeValues(layerId) {
@@ -1003,50 +1752,97 @@
                 return;
             }
             
-            // Get unique values for this column
-            const uniqueValues = new Set();
-            layer.originalData.features.forEach(feature => {
-                const value = feature.properties[column];
-                if (value !== null && value !== undefined) {
-                    uniqueValues.add(String(value));
-                }
-            });
-            
-            // Create color mapping inputs
             const mappingsDiv = document.getElementById(`colorMappings_${layerId}`);
-            mappingsDiv.innerHTML = '<div style="font-size: 11px; color: #856404; margin-bottom: 6px; font-weight: 600;">Value → Color Mappings:</div>';
             
-            const colorOptions = [
-                { value: '#ff6b6b', label: 'Red' },
-                { value: '#4ecdc4', label: 'Cyan' },
-                { value: '#45b7d1', label: 'Blue' },
-                { value: '#96ceb4', label: 'Green' },
-                { value: '#ffeaa7', label: 'Yellow' },
-                { value: '#fd79a8', label: 'Pink' },
-                { value: '#a29bfe', label: 'Purple' },
-                { value: '#fd7e14', label: 'Orange' },
-                { value: '#6c757d', label: 'Gray' },
-                { value: '#2d3436', label: 'Dark' },
-                { value: '#000000', label: 'Black' },
-                { value: '#ffffff', label: 'White' }
-            ];
-            
-            Array.from(uniqueValues).sort().forEach((value, index) => {
-                const savedColor = layer.colorByAttribute?.mappings?.[value] || colorOptions[index % colorOptions.length].value;
-                
-                const mappingDiv = document.createElement('div');
-                mappingDiv.style.cssText = 'display: flex; gap: 4px; align-items: center; margin-bottom: 4px; font-size: 11px;';
-                
-                mappingDiv.innerHTML = `
-                    <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #856404;" title="${value}">${value}</span>
-                    <span style="color: #856404;">→</span>
-                    <select id="colorMap_${layerId}_${value}" style="flex: 1; padding: 2px; font-size: 11px; border: 1px solid #ffc107; border-radius: 3px;">
-                        ${colorOptions.map(opt => `<option value="${opt.value}" ${opt.value === savedColor ? 'selected' : ''}>${opt.label}</option>`).join('')}
+            // Check if column is numeric
+            if (isNumericColumn(layerId, column)) {
+                // Show color ramp selector for numeric data
+                mappingsDiv.innerHTML = `
+                    <div style="font-size: 11px; color: #856404; margin-bottom: 6px; font-weight: 600;">Color Ramp:</div>
+                    <select id="colorRamp_${layerId}" onchange="updateColorRampPreview(${layerId})" 
+                            style="width: 100%; padding: 4px; font-size: 11px; border: 1px solid #ffc107; border-radius: 3px; margin-bottom: 8px;">
+                        <option value="red-green">Red to Green</option>
+                        <option value="blue-red">Blue to Red</option>
+                        <option value="viridis">Viridis (Purple-Blue-Green-Yellow)</option>
+                        <option value="plasma">Plasma (Purple-Pink-Yellow)</option>
+                        <option value="grayscale">Grayscale (Black to White)</option>
+                        <option value="rainbow">Rainbow</option>
                     </select>
+                    <div id="colorRampPreview_${layerId}" style="height: 20px; border: 1px solid #ffc107; border-radius: 3px; margin-bottom: 8px; background: linear-gradient(to right, #d73027, #fc8d59, #fee08b, #d9ef8b, #91bfdb);"></div>
+                    <div style="font-size: 10px; color: #856404; font-style: italic;">
+                        Automatic gradient from min to max values
+                    </div>
                 `;
                 
-                mappingsDiv.appendChild(mappingDiv);
-            });
+                // Set saved ramp if exists
+                const rampSelect = document.getElementById(`colorRamp_${layerId}`);
+                if (layer.colorByAttribute?.rampName) {
+                    rampSelect.value = layer.colorByAttribute.rampName;
+                }
+                updateColorRampPreview(layerId);
+                
+            } else {
+                // Show individual color mappings for categorical data
+                mappingsDiv.innerHTML = '<div style="font-size: 11px; color: #856404; margin-bottom: 6px; font-weight: 600;">Value → Color Mappings:</div>';
+                
+                // Get unique values for this column
+                const uniqueValues = new Set();
+                layer.originalData.features.forEach(feature => {
+                    const value = feature.properties[column];
+                    if (value !== null && value !== undefined) {
+                        uniqueValues.add(String(value));
+                    }
+                });
+                
+                const colorOptions = [
+                    { value: '#ff6b6b', label: 'Red' },
+                    { value: '#4ecdc4', label: 'Cyan' },
+                    { value: '#45b7d1', label: 'Blue' },
+                    { value: '#96ceb4', label: 'Green' },
+                    { value: '#ffeaa7', label: 'Yellow' },
+                    { value: '#fd79a8', label: 'Pink' },
+                    { value: '#a29bfe', label: 'Purple' },
+                    { value: '#fd7e14', label: 'Orange' },
+                    { value: '#6c757d', label: 'Gray' },
+                    { value: '#2d3436', label: 'Dark' },
+                    { value: '#000000', label: 'Black' },
+                    { value: '#ffffff', label: 'White' }
+                ];
+                
+                const sortedValues = Array.from(uniqueValues).sort();
+                
+                sortedValues.forEach((value, index) => {
+                    const savedColor = layer.colorByAttribute?.mappings?.[value] || colorOptions[index % colorOptions.length].value;
+                    
+                    const mappingDiv = document.createElement('div');
+                    mappingDiv.style.cssText = 'display: flex; gap: 4px; align-items: center; margin-bottom: 4px; font-size: 11px;';
+                    
+                    mappingDiv.innerHTML = `
+                        <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #856404;" title="${value}">${value}</span>
+                        <span style="color: #856404;">→</span>
+                        <select id="colorMap_${layerId}_${value}" style="flex: 1; padding: 2px; font-size: 11px; border: 1px solid #ffc107; border-radius: 3px;">
+                            ${colorOptions.map(opt => `<option value="${opt.value}" ${opt.value === savedColor ? 'selected' : ''}>${opt.label}</option>`).join('')}
+                        </select>
+                    `;
+                    
+                    mappingsDiv.appendChild(mappingDiv);
+                });
+            }
+        }
+
+        function updateColorRampPreview(layerId) {
+            const rampSelect = document.getElementById(`colorRamp_${layerId}`);
+            const previewDiv = document.getElementById(`colorRampPreview_${layerId}`);
+            
+            if (!rampSelect || !previewDiv) return;
+            
+            const rampName = rampSelect.value;
+            const ramp = colorRamps[rampName];
+            
+            if (ramp) {
+                const gradientStops = ramp.map(stop => `${stop.color} ${stop.stop * 100}%`).join(', ');
+                previewDiv.style.background = `linear-gradient(to right, ${gradientStops})`;
+            }
         }
         
         // Apply color by attribute settings
@@ -1059,31 +1855,392 @@
                 return;
             }
             
-            // Collect all color mappings
-            const mappings = {};
-            const uniqueValues = new Set();
-            layer.originalData.features.forEach(feature => {
-                const value = feature.properties[column];
-                if (value !== null && value !== undefined) {
-                    uniqueValues.add(String(value));
+            if (isNumericColumn(layerId, column)) {
+                // Handle color ramp for numeric data
+                const rampSelect = document.getElementById(`colorRamp_${layerId}`);
+                const rampName = rampSelect ? rampSelect.value : 'red-green';
+                
+                // Get min/max values for the column
+                const values = layer.originalData.features
+                    .map(f => parseFloat(f.properties[column]))
+                    .filter(v => !isNaN(v) && isFinite(v));
+                
+                if (values.length === 0) {
+                    alert('No valid numeric values found in selected column!');
+                    return;
                 }
-            });
-            
-            uniqueValues.forEach(value => {
-                const select = document.getElementById(`colorMap_${layerId}_${value}`);
-                if (select) {
-                    mappings[value] = select.value;
-                }
-            });
-            
-            // Save settings
-            layer.colorByAttribute = {
-                enabled: true,
-                column: column,
-                mappings: mappings
-            };
+                
+                const minValue = Math.min(...values);
+                const maxValue = Math.max(...values);
+                
+                // Create mappings for all unique values using the color ramp
+                const mappings = {};
+                const uniqueValues = new Set();
+                layer.originalData.features.forEach(feature => {
+                    const value = feature.properties[column];
+                    if (value !== null && value !== undefined) {
+                        uniqueValues.add(String(value));
+                    }
+                });
+                
+                uniqueValues.forEach(value => {
+                    const numericValue = parseFloat(value);
+                    if (!isNaN(numericValue) && isFinite(numericValue)) {
+                        mappings[value] = getColorFromRamp(rampName, numericValue, minValue, maxValue);
+                    } else {
+                        mappings[value] = '#cccccc'; // Gray for non-numeric values
+                    }
+                });
+                
+                // Save settings with ramp info
+                layer.colorByAttribute = {
+                    enabled: true,
+                    column: column,
+                    mappings: mappings,
+                    isRamp: true,
+                    rampName: rampName,
+                    minValue: minValue,
+                    maxValue: maxValue
+                };
+                
+            } else {
+                // Handle individual color mappings for categorical data
+                const mappings = {};
+                const uniqueValues = new Set();
+                layer.originalData.features.forEach(feature => {
+                    const value = feature.properties[column];
+                    if (value !== null && value !== undefined) {
+                        uniqueValues.add(String(value));
+                    }
+                });
+                
+                uniqueValues.forEach(value => {
+                    const select = document.getElementById(`colorMap_${layerId}_${value}`);
+                    if (select) {
+                        mappings[value] = select.value;
+                    }
+                });
+                
+                // Save settings
+                layer.colorByAttribute = {
+                    enabled: true,
+                    column: column,
+                    mappings: mappings,
+                    isRamp: false
+                };
+            }
             
             // Recreate layer with new colors
+            createLayer(layerId);
+            renderLayerList();
+        }
+
+        // Simple Legend Functions
+        function showLegendForLayer(layerId) {
+            const layer = layers[layerId];
+            const legendDiv = document.getElementById('mapLegend');
+            const contentDiv = document.getElementById('legendContent');
+            
+            if (!legendDiv || !contentDiv) {
+                console.error('Legend elements not found');
+                return;
+            }
+            
+            // Show the legend
+            legendDiv.style.display = 'block';
+            
+            // Remove existing entry for this layer if it exists
+            const existingEntry = document.getElementById(`legendEntry_${layerId}`);
+            if (existingEntry) {
+                existingEntry.remove();
+            }
+            
+            // Create container for this layer's legend entry
+            const layerContainer = document.createElement('div');
+            layerContainer.id = `legendEntry_${layerId}`;
+            layerContainer.style.cssText = 'margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;';
+            
+            // Add layer info
+            const layerTitle = document.createElement('div');
+            layerTitle.style.cssText = 'font-weight: bold; margin-bottom: 8px; color: #444; font-size: 13px; border-bottom: 1px solid #ddd; padding-bottom: 4px;';
+            layerTitle.textContent = layer.config.name;
+            layerContainer.appendChild(layerTitle);
+            
+            // Basic layer info
+            const basicInfo = document.createElement('div');
+            basicInfo.style.cssText = 'margin-bottom: 10px; font-size: 11px; color: #666;';
+            basicInfo.innerHTML = `
+                <div>Features: ${layer.data.features.length}</div>
+                <div>Color: <span style="display: inline-block; width: 12px; height: 12px; background: ${layer.config.color}; border: 1px solid #333; margin: 0 4px; border-radius: 2px;"></span>${layer.config.color}</div>
+                <div>Size: ${layer.config.size}px</div>
+            `;
+            layerContainer.appendChild(basicInfo);
+            
+            // Color by Attribute section
+            if (layer.colorByAttribute?.enabled && layer.colorByAttribute?.mappings) {
+                const colorSection = document.createElement('div');
+                colorSection.style.cssText = 'margin-bottom: 10px;';
+                
+                const colorTitle = document.createElement('div');
+                colorTitle.style.cssText = 'font-size: 12px; font-weight: 600; color: #444; margin-bottom: 6px;';
+                colorTitle.textContent = `Color by: ${layer.colorByAttribute.column}`;
+                colorSection.appendChild(colorTitle);
+                
+                if (layer.colorByAttribute.isRamp) {
+                    // Show color ramp for numeric data
+                    const rampInfo = document.createElement('div');
+                    rampInfo.style.cssText = 'font-size: 10px; color: #666; margin-bottom: 6px;';
+                    rampInfo.textContent = `Range: ${layer.colorByAttribute.minValue} - ${layer.colorByAttribute.maxValue}`;
+                    colorSection.appendChild(rampInfo);
+                    
+                    // Create color ramp gradient
+                    const ramp = colorRamps[layer.colorByAttribute.rampName];
+                    if (ramp) {
+                        const gradientStops = ramp.map(stop => `${stop.color} ${stop.stop * 100}%`).join(', ');
+                        
+                        const rampDisplay = document.createElement('div');
+                        rampDisplay.style.cssText = `
+                            height: 15px; 
+                            background: linear-gradient(to right, ${gradientStops}); 
+                            border: 1px solid #333; 
+                            border-radius: 3px; 
+                            margin-bottom: 4px;
+                        `;
+                        colorSection.appendChild(rampDisplay);
+                        
+                        // Add min/max labels
+                        const labels = document.createElement('div');
+                        labels.style.cssText = 'display: flex; justify-content: space-between; font-size: 9px; color: #666;';
+                        labels.innerHTML = `<span>Low</span><span>High</span>`;
+                        colorSection.appendChild(labels);
+                    }
+                    
+                } else {
+                    // Show individual color mappings for categorical data
+                    const uniqueValues = new Set();
+                    layer.originalData.features.forEach(feature => {
+                        const value = feature.properties[layer.colorByAttribute.column];
+                        if (value !== null && value !== undefined) {
+                            uniqueValues.add(String(value));
+                        }
+                    });
+                    
+                    const valuesArray = Array.from(uniqueValues);
+                    const allNumeric = valuesArray.every(v => !isNaN(parseFloat(v)) && isFinite(parseFloat(v)));
+                    const sortedValues = allNumeric 
+                        ? valuesArray.sort((a, b) => parseFloat(a) - parseFloat(b))
+                        : valuesArray.sort();
+                    
+                    sortedValues.forEach(value => {
+                        const color = layer.colorByAttribute.mappings[value];
+                        if (color) {
+                            const item = document.createElement('div');
+                            item.style.cssText = 'display: flex; align-items: center; margin: 3px 0; font-size: 10px;';
+                            item.innerHTML = `
+                                <div style="width: 12px; height: 12px; background-color: ${color}; border: 1px solid #333; margin-right: 6px; border-radius: 2px;"></div>
+                                <span style="color: #333;" title="${value}">${value}</span>
+                            `;
+                            colorSection.appendChild(item);
+                        }
+                    });
+                }
+                
+                layerContainer.appendChild(colorSection);
+            }
+            
+            // Size by Attribute section
+            if (layer.sizeByAttribute?.enabled && layer.sizeByAttribute?.column) {
+                const sizeSection = document.createElement('div');
+                sizeSection.style.cssText = 'margin-bottom: 10px;';
+                
+                const sizeTitle = document.createElement('div');
+                sizeTitle.style.cssText = 'font-size: 12px; font-weight: 600; color: #444; margin-bottom: 6px;';
+                sizeTitle.textContent = `Size by: ${layer.sizeByAttribute.column}`;
+                sizeSection.appendChild(sizeTitle);
+                
+                const sizeInfo = document.createElement('div');
+                sizeInfo.style.cssText = 'font-size: 10px; color: #666; margin-bottom: 6px;';
+                sizeInfo.textContent = `Range: ${layer.sizeByAttribute.minValue} - ${layer.sizeByAttribute.maxValue}`;
+                sizeSection.appendChild(sizeInfo);
+                
+                // Check if this is a boundary layer
+                const isBoundaryLayer = layer.config.name.includes('ESHM13') || 
+                                      layer.config.name.includes('ESHM20') || 
+                                      layer.config.name.includes('VAM16');
+                
+                if (isBoundaryLayer) {
+                    // Show line width samples for boundary layers
+                    const sizeScale = document.createElement('div');
+                    sizeScale.style.cssText = 'margin: 6px 0;';
+                    
+                    const minLine = document.createElement('div');
+                    minLine.style.cssText = `
+                        height: ${layer.sizeByAttribute.minSize}px; 
+                        background-color: ${layer.config.color}; 
+                        margin: 4px 0;
+                        width: 60px;
+                    `;
+                    
+                    const maxLine = document.createElement('div');
+                    maxLine.style.cssText = `
+                        height: ${layer.sizeByAttribute.maxSize}px; 
+                        background-color: ${layer.config.color}; 
+                        margin: 4px 0;
+                        width: 60px;
+                    `;
+                    
+                    sizeScale.appendChild(minLine);
+                    sizeScale.appendChild(document.createTextNode(' → '));
+                    sizeScale.appendChild(maxLine);
+                    sizeSection.appendChild(sizeScale);
+                    
+                    const sizeLabels = document.createElement('div');
+                    sizeLabels.style.cssText = 'display: flex; justify-content: space-between; font-size: 9px; color: #666;';
+                    sizeLabels.innerHTML = `<span>Min: ${layer.sizeByAttribute.minSize}px width</span><span>Max: ${layer.sizeByAttribute.maxSize}px width</span>`;
+                    sizeSection.appendChild(sizeLabels);
+                    
+                } else {
+                    // Show circles for point/polygon layers
+                    const sizeScale = document.createElement('div');
+                    sizeScale.style.cssText = 'display: flex; align-items: center; gap: 8px; margin: 6px 0;';
+                    
+                    const minCircle = document.createElement('div');
+                    minCircle.style.cssText = `
+                        width: ${layer.sizeByAttribute.minSize}px; 
+                        height: ${layer.sizeByAttribute.minSize}px; 
+                        background-color: ${layer.config.color}; 
+                        border: 1px solid #333; 
+                        border-radius: 50%;
+                    `;
+                    
+                    const maxCircle = document.createElement('div');
+                    maxCircle.style.cssText = `
+                        width: ${layer.sizeByAttribute.maxSize}px; 
+                        height: ${layer.sizeByAttribute.maxSize}px; 
+                        background-color: ${layer.config.color}; 
+                        border: 1px solid #333; 
+                        border-radius: 50%;
+                    `;
+                    
+                    sizeScale.appendChild(minCircle);
+                    sizeScale.appendChild(document.createTextNode(' → '));
+                    sizeScale.appendChild(maxCircle);
+                    sizeSection.appendChild(sizeScale);
+                    
+                    const sizeLabels = document.createElement('div');
+                    sizeLabels.style.cssText = 'display: flex; justify-content: space-between; font-size: 9px; color: #666;';
+                    sizeLabels.innerHTML = `<span>${layer.sizeByAttribute.minSize}px</span><span>${layer.sizeByAttribute.maxSize}px</span>`;
+                    sizeSection.appendChild(sizeLabels);
+                }
+                
+                layerContainer.appendChild(sizeSection);
+            }
+            
+            // If no attribute styling, show basic legend
+            if (!layer.colorByAttribute?.enabled && !layer.sizeByAttribute?.enabled) {
+                const basicLegend = document.createElement('div');
+                basicLegend.style.cssText = 'font-size: 11px; color: #666; font-style: italic; padding: 10px; text-align: center; background: #f8f9fa; border-radius: 4px;';
+                basicLegend.textContent = 'Enable "Color by Attribute" or "Size by Attribute" for detailed legend';
+                layerContainer.appendChild(basicLegend);
+            }
+            
+            // Add the layer container to the legend content
+            contentDiv.appendChild(layerContainer);
+        }
+        
+        function closeLegend() {
+            const legendDiv = document.getElementById('mapLegend');
+            const contentDiv = document.getElementById('legendContent');
+            
+            if (legendDiv && contentDiv) {
+                // Clear all legend entries
+                contentDiv.innerHTML = '';
+                legendDiv.style.display = 'none';
+                
+                // Uncheck all "Show in Legend" checkboxes
+                Object.keys(layers).forEach(layerId => {
+                    const checkbox = document.getElementById(`showLegend_${layerId}`);
+                    if (checkbox) {
+                        checkbox.checked = false;
+                    }
+                });
+            }
+        }        function applySizeByAttribute(layerId) {
+            const layer = layers[layerId];
+            const column = document.getElementById(`sizeAttrColumn_${layerId}`)?.value;
+            
+            if (!column) {
+                alert('Please select a numeric attribute column first!');
+                return;
+            }
+            
+            // Get input values
+            const minValueInput = document.getElementById(`sizeMinValue_${layerId}`);
+            const maxValueInput = document.getElementById(`sizeMaxValue_${layerId}`);
+            const minSizeInput = document.getElementById(`sizeMinSize_${layerId}`);
+            const maxSizeInput = document.getElementById(`sizeMaxSize_${layerId}`);
+            const preserveColorInput = document.getElementById(`preserveColor_${layerId}`);
+            
+            // Parse values
+            let minValue = parseFloat(minValueInput.value);
+            let maxValue = parseFloat(maxValueInput.value);
+            const minSize = parseFloat(minSizeInput.value) || 3;
+            const maxSize = parseFloat(maxSizeInput.value) || 15;
+            const preserveColor = preserveColorInput.checked;
+            
+            // If min/max values not provided, calculate from data
+            if (isNaN(minValue) || isNaN(maxValue)) {
+                const values = layer.originalData.features
+                    .map(f => f.properties[column])
+                    .filter(v => v !== null && v !== undefined && !isNaN(parseFloat(v)))
+                    .map(v => parseFloat(v));
+                
+                if (values.length === 0) {
+                    alert('No numeric values found in selected column!');
+                    return;
+                }
+                
+                if (isNaN(minValue)) minValue = Math.min(...values);
+                if (isNaN(maxValue)) maxValue = Math.max(...values);
+            }
+            
+            // Validation
+            if (minValue >= maxValue) {
+                alert('Min value must be less than max value!');
+                return;
+            }
+            if (minSize >= maxSize) {
+                alert('Min size must be less than max size!');
+                return;
+            }
+            
+            // Clear color styling if not preserving
+            if (!preserveColor) {
+                layer.colorByAttribute = {
+                    enabled: false,
+                    column: null,
+                    mappings: null
+                };
+                // Update color checkbox
+                const colorCheckbox = document.getElementById(`colorByAttr_${layerId}`);
+                if (colorCheckbox) colorCheckbox.checked = false;
+                const colorPanel = document.getElementById(`colorByAttrPanel_${layerId}`);
+                if (colorPanel) colorPanel.style.display = 'none';
+            }
+            
+            // Save size by attribute settings
+            layer.sizeByAttribute = {
+                enabled: true,
+                column: column,
+                minValue: minValue,
+                maxValue: maxValue,
+                minSize: minSize,
+                maxSize: maxSize
+            };
+            
+            console.log(`Applied size scaling: ${column} [${minValue}-${maxValue}] → [${minSize}-${maxSize}]px`);
+            
+            // Recreate layer with new sizes
             createLayer(layerId);
             renderLayerList();
         }
@@ -1106,10 +2263,1217 @@
                 renderLayerList();
             }
         }
+
+        // ===============================
+        // MULTI-ATTRIBUTE FILTERING SYSTEM
+        // ===============================
+
+        let filterRowCounter = 0;
+        let multiFilters = {}; // Store filters per layer
+
+        // Initialize multi-filter system for active layer
+        function initializeMultiFilter() {
+            if (activeLayerId === null) return;
+
+            // Initialize filter storage for this layer if not exists
+            if (!multiFilters[activeLayerId]) {
+                multiFilters[activeLayerId] = [];
+            }
+
+            // Clear and rebuild filter container
+            const container = document.getElementById('multiFilterContainer');
+            container.innerHTML = '';
+            filterRowCounter = 0;
+
+            // If layer has existing filters, recreate them
+            if (multiFilters[activeLayerId].length > 0) {
+                multiFilters[activeLayerId].forEach(filter => {
+                    addFilterRow(filter);
+                });
+            } else {
+                // Add initial empty filter row
+                addFilterRow();
+            }
+
+            updateFilterSummary();
+        }
+
+        // Add a new filter row
+        function addFilterRow(existingFilter = null) {
+            if (activeLayerId === null) {
+                alert('Please select a layer first!');
+                return;
+            }
+
+            filterRowCounter++;
+            const container = document.getElementById('multiFilterContainer');
+            const layer = layers[activeLayerId];
+            
+            if (!layer || !layer.originalData.features.length) return;
+
+            // Get column options from first feature
+            const firstFeature = layer.originalData.features[0];
+            const columns = Object.keys(firstFeature.properties);
+
+            const filterRow = document.createElement('div');
+            filterRow.className = 'filter-row';
+            filterRow.id = `filter-row-${filterRowCounter}`;
+            filterRow.dataset.filterId = filterRowCounter;
+
+            filterRow.innerHTML = `
+                <div class="filter-row-header">
+                    <div class="filter-row-number">${filterRowCounter}</div>
+                    <button class="filter-remove-btn" onclick="removeFilterRow(${filterRowCounter})" title="Remove this filter">×</button>
+                </div>
+
+                <div class="filter-control-group">
+                    <label>Column:</label>
+                    <select id="filterColumn_${filterRowCounter}" onchange="updateFilterValueInput(${filterRowCounter})">
+                        <option value="">-- Select Column --</option>
+                        ${columns.map(col => `<option value="${col}" ${existingFilter?.column === col ? 'selected' : ''}>${col}</option>`).join('')}
+                    </select>
+                </div>
+
+                <div class="filter-control-group">
+                    <label>Filter Type:</label>
+                    <select id="filterType_${filterRowCounter}" onchange="updateFilterValueInput(${filterRowCounter})">
+                        <option value="single" ${!existingFilter || existingFilter.type === 'single' ? 'selected' : ''}>Single Value</option>
+                        <option value="range" ${existingFilter?.type === 'range' ? 'selected' : ''}>Range (Min-Max)</option>
+                        <option value="list" ${existingFilter?.type === 'list' ? 'selected' : ''}>Multiple Values</option>
+                        <option value="contains" ${existingFilter?.type === 'contains' ? 'selected' : ''}>Contains Text</option>
+                    </select>
+                </div>
+
+                <div class="filter-control-group" id="operatorGroup_${filterRowCounter}">
+                    <label>Operator:</label>
+                    <select id="filterOperator_${filterRowCounter}">
+                        <option value=">=" ${existingFilter?.operator === '>=' ? 'selected' : ''}>&gt;=</option>
+                        <option value="<=" ${existingFilter?.operator === '<=' ? 'selected' : ''}>&lt;=</option>
+                        <option value="=" ${existingFilter?.operator === '=' ? 'selected' : ''}>=</option>
+                        <option value=">" ${existingFilter?.operator === '>' ? 'selected' : ''}>&gt;</option>
+                        <option value="<" ${existingFilter?.operator === '<' ? 'selected' : ''}>&lt;</option>
+                        <option value="!=" ${existingFilter?.operator === '!=' ? 'selected' : ''}>≠</option>
+                    </select>
+                </div>
+
+                <div class="filter-control-group" id="valueGroup_${filterRowCounter}">
+                    <label>Value(s):</label>
+                    <div id="valueContainer_${filterRowCounter}">
+                        <!-- Value inputs will be populated by updateFilterValueInput -->
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(filterRow);
+
+            // Initialize the value input based on existing filter or defaults
+            setTimeout(() => updateFilterValueInput(filterRowCounter, existingFilter), 100);
+        }
+
+        // Remove a filter row
+        function removeFilterRow(filterId) {
+            const filterRow = document.getElementById(`filter-row-${filterId}`);
+            if (filterRow) {
+                filterRow.remove();
+                
+                // Remove from stored filters
+                if (activeLayerId !== null && multiFilters[activeLayerId]) {
+                    multiFilters[activeLayerId] = multiFilters[activeLayerId].filter(f => f.id !== filterId);
+                }
+
+                updateFilterSummary();
+
+                // If no filters remain, add one empty row
+                if (document.getElementById('multiFilterContainer').children.length === 0) {
+                    addFilterRow();
+                }
+            }
+        }
+
+        // Update value input based on column type and filter type
+        function updateFilterValueInput(filterId, existingFilter = null) {
+            const columnSelect = document.getElementById(`filterColumn_${filterId}`);
+            const typeSelect = document.getElementById(`filterType_${filterId}`);
+            const operatorGroup = document.getElementById(`operatorGroup_${filterId}`);
+            const valueContainer = document.getElementById(`valueContainer_${filterId}`);
+            
+            if (!columnSelect || !typeSelect || !valueContainer) return;
+
+            const column = columnSelect.value;
+            const filterType = typeSelect.value;
+            
+            if (!column) {
+                valueContainer.innerHTML = '<input type="text" placeholder="Select a column first" disabled>';
+                return;
+            }
+
+            // Get column data type and unique values
+            const layer = layers[activeLayerId];
+            const sampleValues = layer.originalData.features
+                .slice(0, 100) // Sample first 100 features for performance
+                .map(f => f.properties[column])
+                .filter(v => v !== null && v !== undefined);
+
+            const isNumeric = sampleValues.length > 0 && sampleValues.every(v => !isNaN(parseFloat(v)));
+            const uniqueValues = [...new Set(sampleValues)].sort();
+
+            // Show/hide operator group based on filter type
+            if (filterType === 'contains' || filterType === 'list') {
+                operatorGroup.style.display = 'none';
+            } else {
+                operatorGroup.style.display = 'block';
+            }
+
+            // Generate appropriate input controls
+            let inputHTML = '';
+            
+            switch (filterType) {
+                case 'single':
+                    if (isNumeric) {
+                        inputHTML = `<input type="number" id="filterValue_${filterId}" step="any" placeholder="Enter number" value="${existingFilter?.value || ''}">`;
+                    } else if (uniqueValues.length <= 50) {
+                        inputHTML = `
+                            <select id="filterValue_${filterId}">
+                                <option value="">-- Select Value --</option>
+                                ${uniqueValues.map(val => `<option value="${val}" ${existingFilter?.value === val ? 'selected' : ''}>${val}</option>`).join('')}
+                            </select>`;
+                    } else {
+                        // Use searchable dropdown for large string datasets
+                        inputHTML = `<div id="searchable-container-${filterId}"></div>`;
+                        valueContainer.innerHTML = inputHTML;
+                        
+                        // Create searchable dropdown after DOM update
+                        setTimeout(() => {
+                            const dropdown = createSearchableDropdown(
+                                `searchable-container-${filterId}`,
+                                uniqueValues,
+                                `Search ${column}...`,
+                                (selectedValue) => {
+                                    console.log(`Selected value for ${column}: ${selectedValue}`);
+                                }
+                            );
+                            
+                            // Set existing value if provided
+                            if (existingFilter?.value) {
+                                dropdown.setValue(existingFilter.value);
+                            }
+                            
+                            // Store reference for collecting filter values
+                            valueContainer._searchableDropdown = dropdown;
+                        }, 10);
+                        
+                        return; // Early return to avoid setting innerHTML again
+                    }
+                    break;
+
+                case 'range':
+                    inputHTML = `
+                        <div class="range-inputs">
+                            <input type="number" id="filterValueMin_${filterId}" step="any" placeholder="Min" value="${existingFilter?.valueMin || ''}">
+                            <span class="range-separator">to</span>
+                            <input type="number" id="filterValueMax_${filterId}" step="any" placeholder="Max" value="${existingFilter?.valueMax || ''}">
+                        </div>`;
+                    break;
+
+                case 'list':
+                    if (uniqueValues.length <= 100) {
+                        const selectedValues = existingFilter?.values || [];
+                        inputHTML = `
+                            <select id="filterValueList_${filterId}" multiple style="height: 80px;">
+                                ${uniqueValues.map(val => `<option value="${val}" ${selectedValues.includes(val) ? 'selected' : ''}>${val}</option>`).join('')}
+                            </select>
+                            <div style="font-size: 10px; color: #6c757d; margin-top: 3px;">Hold Ctrl/Cmd to select multiple</div>`;
+                    } else {
+                        inputHTML = `<textarea id="filterValueList_${filterId}" placeholder="Enter values separated by commas" style="height: 60px; resize: vertical;">${existingFilter?.values?.join(', ') || ''}</textarea>`;
+                    }
+                    break;
+
+                case 'contains':
+                    inputHTML = `<input type="text" id="filterValueContains_${filterId}" placeholder="Text to search for" value="${existingFilter?.value || ''}">`;
+                    break;
+            }
+
+            valueContainer.innerHTML = inputHTML;
+        }
+
+        // Apply all filters to the active layer
+        async function applyMultiFilter() {
+            if (activeLayerId === null) {
+                alert('Please select a layer first!');
+                return;
+            }
+
+            const layer = layers[activeLayerId];
+            const totalFeatures = layer.originalData.features.length;
+            
+            // Show performance warning for large datasets
+            if (totalFeatures > 50000) {
+                const proceed = confirm(
+                    `⚠️ Large Dataset Warning!\n\n` +
+                    `This layer has ${totalFeatures.toLocaleString()} features.\n` +
+                    `Filtering may take several minutes and could freeze the browser.\n\n` +
+                    `Recommendations:\n` +
+                    `• Use "Preview" first to test your filters\n` +
+                    `• Consider adding more specific filter conditions\n` +
+                    `• Close other browser tabs to free memory\n\n` +
+                    `Do you want to continue?`
+                );
+                
+                if (!proceed) return;
+            }
+
+            // Show loading indicator
+            const loadingIndicator = document.getElementById('filterLoadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'block';
+                // Update loading message for large datasets
+                if (totalFeatures > 50000) {
+                    loadingIndicator.innerHTML = `
+                        <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #007bff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-right: 10px;"></div>
+                        <span style="color: #004085; font-weight: 600;">Processing ${totalFeatures.toLocaleString()} features... This may take a few minutes.</span>
+                    `;
+                }
+            }
+
+            try {
+                // Small delay to show loading indicator
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                const layer = layers[activeLayerId];
+                const filterLogic = document.getElementById('filterLogic').value;
+                const filterRows = document.querySelectorAll('.filter-row');
+                
+                // Collect all filter conditions
+                const conditions = [];
+                multiFilters[activeLayerId] = []; // Reset stored filters
+
+                for (let filterRow of filterRows) {
+                    const filterId = filterRow.dataset.filterId;
+                    const condition = collectFilterCondition(filterId);
+                    
+                    if (condition) {
+                        conditions.push(condition);
+                        multiFilters[activeLayerId].push(condition);
+                    }
+                }
+
+                if (conditions.length === 0) {
+                    alert('Please configure at least one filter condition!');
+                    return;
+                }
+
+                // Apply filters
+                const totalFeatures = layer.originalData.features.length;
+                const features = layer.originalData.features;
+                let results = [];
+                let matchingFeatures = 0;
+
+                // Use Web Workers for large datasets (>50000 features) - optimized for AMD Ryzen 5 4600H
+                if (totalFeatures > 50000 && window.Worker) {
+                    console.log(`Using Web Workers for ${totalFeatures} features`);
+                    
+                    try {
+                        const progressCallback = (progress, matchingCount, processedFeatures, totalFeatures, timeLeft) => {
+                            console.log(`Processing: ${processedFeatures.toLocaleString()} / ${totalFeatures.toLocaleString()} events (${matchingCount} matches, ${timeLeft} remaining)`);
+                            // Update loading indicator with real-time event count and time estimate while preserving stop button
+                            if (loadingIndicator) {
+                                loadingIndicator.innerHTML = `
+                                    <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #007bff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-right: 10px;"></div>
+                                    <span style="color: #004085; font-weight: 600;">Processing... ${processedFeatures.toLocaleString()} / ${totalFeatures.toLocaleString()} events (${timeLeft} remaining)</span>
+                                    <div style="margin-top: 10px;">
+                                        <button id="stopFilteringBtn" onclick="stopFiltering()" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                                            ⏹️ Stop Filtering
+                                        </button>
+                                    </div>
+                                `;
+                            }
+                        };
+
+                        const workerResult = await processFilteringWithWorker(features, conditions, filterLogic, progressCallback);
+                        const workerResults = workerResult.results;
+                        matchingFeatures = workerResult.totalMatching;
+
+                                // Convert worker results to expected format with index for fast lookup
+                        results = features.map((feature, index) => ({
+                            feature,
+                            matches: workerResults[index],
+                            featureIndex: index
+                        }));
+
+                        console.log(`Web Worker processing complete: ${matchingFeatures} matches found`);
+                    } catch (error) {
+                        console.error('Web Worker failed, falling back to main thread:', error);
+                        // Fall back to main thread processing
+                        results = await processFilteringMainThread(features, conditions, filterLogic);
+                        matchingFeatures = results.filter(r => r.matches).length;
+                    }
+                } else {
+                    // Process on main thread for smaller datasets or if Web Workers unavailable
+                    console.log(`Processing ${totalFeatures} features on main thread`);
+                    
+                    const mainThreadProgressCallback = (progress, matchingCount, processedFeatures, totalFeatures, timeLeft) => {
+                        console.log(`Main thread processing: ${processedFeatures.toLocaleString()} / ${totalFeatures.toLocaleString()} events (${matchingCount} matches, ${timeLeft} remaining)`);
+                        if (loadingIndicator) {
+                            loadingIndicator.innerHTML = `
+                                <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #007bff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-right: 10px;"></div>
+                                <span style="color: #004085; font-weight: 600;">Processing... ${processedFeatures.toLocaleString()} / ${totalFeatures.toLocaleString()} events (${timeLeft} remaining)</span>
+                                <div style="margin-top: 10px;">
+                                    <button id="stopFilteringBtn" onclick="stopFiltering()" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                                        ⏹️ Stop Filtering
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    };
+                    
+                    results = await processFilteringMainThread(features, conditions, filterLogic, mainThreadProgressCallback);
+                    matchingFeatures = results.filter(r => r.matches).length;
+                }
+
+                // Store filter results
+                layer.multiFilterResults = results;
+                layer.isFiltered = true;
+                layer.filterType = 'multi';
+                layer.matchingCount = matchingFeatures;
+
+                // Update display
+                createLayer(activeLayerId);
+                renderLayerList();
+                updateInfo();
+                updateFilterSummary();
+
+                alert(`Multi-filter applied! Found ${matchingFeatures} of ${totalFeatures} matching features.`);
+
+            } catch (error) {
+                console.error('Filter application error:', error);
+                if (error.message !== 'Filtering stopped by user') {
+                    alert('Error applying filters. Check console for details.');
+                }
+            } finally {
+                // Clean up state
+                isFilteringActive = false;
+                activeFilteringWorkers.forEach(w => w.terminate());
+                activeFilteringWorkers = [];
+                
+                if (loadingIndicator) loadingIndicator.style.display = 'none';
+            }
+        }
+
+        // Collect filter condition from a filter row
+        function collectFilterCondition(filterId) {
+            const column = document.getElementById(`filterColumn_${filterId}`)?.value;
+            const filterType = document.getElementById(`filterType_${filterId}`)?.value;
+            const operator = document.getElementById(`filterOperator_${filterId}`)?.value;
+
+            if (!column) return null;
+
+            const condition = {
+                id: parseInt(filterId),
+                column,
+                type: filterType,
+                operator
+            };
+
+            // Collect values based on filter type
+            switch (filterType) {
+                case 'single':
+                    let singleValue;
+                    const singleInput = document.getElementById(`filterValue_${filterId}`);
+                    const valueContainer = document.getElementById(`valueContainer_${filterId}`);
+                    
+                    if (singleInput) {
+                        singleValue = singleInput.value;
+                    } else if (valueContainer?._searchableDropdown) {
+                        singleValue = valueContainer._searchableDropdown.getValue();
+                    }
+                    
+                    if (!singleValue && singleValue !== 0) return null;
+                    condition.value = singleValue;
+                    break;
+
+                case 'range':
+                    const minValue = document.getElementById(`filterValueMin_${filterId}`)?.value;
+                    const maxValue = document.getElementById(`filterValueMax_${filterId}`)?.value;
+                    if (!minValue && !maxValue) return null;
+                    condition.valueMin = minValue ? parseFloat(minValue) : -Infinity;
+                    condition.valueMax = maxValue ? parseFloat(maxValue) : Infinity;
+                    break;
+
+                case 'list':
+                    const listElement = document.getElementById(`filterValueList_${filterId}`);
+                    let values = [];
+                    
+                    if (listElement.tagName === 'SELECT') {
+                        values = Array.from(listElement.selectedOptions).map(opt => opt.value);
+                    } else {
+                        values = listElement.value.split(',').map(v => v.trim()).filter(v => v);
+                    }
+                    
+                    if (values.length === 0) return null;
+                    condition.values = values;
+                    break;
+
+                case 'contains':
+                    const containsValue = document.getElementById(`filterValueContains_${filterId}`)?.value;
+                    if (!containsValue) return null;
+                    condition.value = containsValue;
+                    break;
+
+                default:
+                    return null;
+            }
+
+            return condition;
+        }
+
+        // Evaluate if a feature matches the filter conditions
+        function evaluateFeatureConditions(feature, conditions, logic) {
+            console.log(`[FILTER DEBUG] Evaluating feature:`, feature.properties);
+            console.log(`[FILTER DEBUG] Conditions:`, conditions);
+            console.log(`[FILTER DEBUG] Logic:`, logic);
+            
+            if (conditions.length === 0) {
+                console.log(`[FILTER DEBUG] No conditions, returning true`);
+                return true;
+            }
+
+            const results = conditions.map((condition, index) => {
+                const propValue = feature.properties[condition.column];
+                console.log(`[FILTER DEBUG] Condition ${index}: Column='${condition.column}', Value='${propValue}', Type='${condition.type}'`);
+                
+                let result = false;
+                
+                switch (condition.type) {
+                    case 'single':
+                        result = evaluateSingleCondition(propValue, condition.operator, condition.value);
+                        console.log(`[FILTER DEBUG] Single condition: ${propValue} ${condition.operator} ${condition.value} = ${result}`);
+                        break;
+                    
+                    case 'range':
+                        const numValue = parseFloat(propValue);
+                        result = !isNaN(numValue) && numValue >= condition.valueMin && numValue <= condition.valueMax;
+                        console.log(`[FILTER DEBUG] Range condition: ${numValue} in [${condition.valueMin}, ${condition.valueMax}] = ${result}`);
+                        break;
+                    
+                    case 'list':
+                        result = condition.values.includes(String(propValue));
+                        console.log(`[FILTER DEBUG] List condition: '${propValue}' in [${condition.values.join(', ')}] = ${result}`);
+                        break;
+                    
+                    case 'contains':
+                        result = String(propValue).toLowerCase().includes(condition.value.toLowerCase());
+                        console.log(`[FILTER DEBUG] Contains condition: '${propValue}' contains '${condition.value}' = ${result}`);
+                        break;
+                    
+                    default:
+                        console.log(`[FILTER DEBUG] Unknown condition type: ${condition.type}`);
+                        result = false;
+                }
+                
+                return result;
+            });
+
+            const finalResult = logic === 'AND' ? results.every(r => r) : results.some(r => r);
+            console.log(`[FILTER DEBUG] Individual results:`, results);
+            console.log(`[FILTER DEBUG] Final result (${logic}):`, finalResult);
+            
+            return finalResult;
+        }
+
+        // Evaluate single condition with operator
+        function evaluateSingleCondition(propValue, operator, filterValue) {
+            // Try numeric comparison first
+            const numProp = parseFloat(propValue);
+            const numFilter = parseFloat(filterValue);
+            
+            if (!isNaN(numProp) && !isNaN(numFilter)) {
+                switch (operator) {
+                    case '>=': return numProp >= numFilter;
+                    case '<=': return numProp <= numFilter;
+                    case '=': return numProp === numFilter;
+                    case '>': return numProp > numFilter;
+                    case '<': return numProp < numFilter;
+                    case '!=': return numProp !== numFilter;
+                    default: return false;
+                }
+            } else {
+                // String comparison
+                const strProp = String(propValue);
+                const strFilter = String(filterValue);
+                
+                switch (operator) {
+                    case '=': return strProp === strFilter;
+                    case '!=': return strProp !== strFilter;
+                    case '>=': return strProp >= strFilter;
+                    case '<=': return strProp <= strFilter;
+                    case '>': return strProp > strFilter;
+                    case '<': return strProp < strFilter;
+                    default: return false;
+                }
+            }
+        }
+
+        // Reset all filters for active layer
+        function resetAllFilters() {
+            if (activeLayerId === null) return;
+
+            const layer = layers[activeLayerId];
+            
+            // Clear filter data
+            layer.isFiltered = false;
+            layer.filterType = null;
+            layer.multiFilterResults = null;
+            layer.matchingCount = null;
+            
+            // Clear stored filters
+            multiFilters[activeLayerId] = [];
+            
+            // Reset UI
+            initializeMultiFilter();
+            
+            // Update display
+            createLayer(activeLayerId);
+            renderLayerList();
+            updateInfo();
+            updateFilterSummary();
+        }
+
+        // Update filter summary display
+        function updateFilterSummary() {
+            const summaryContainer = document.getElementById('filterSummary');
+            const summaryContent = document.getElementById('filterSummaryContent');
+            const showSummary = document.getElementById('showFilterSummary')?.checked;
+
+            if (!showSummary || activeLayerId === null || !multiFilters[activeLayerId] || multiFilters[activeLayerId].length === 0) {
+                summaryContainer.style.display = 'none';
+                return;
+            }
+
+            const filters = multiFilters[activeLayerId];
+            const logic = document.getElementById('filterLogic')?.value || 'AND';
+            
+            let summaryText = filters.map((filter, index) => {
+                let desc = `${filter.column} `;
+                
+                switch (filter.type) {
+                    case 'single':
+                        desc += `${filter.operator} "${filter.value}"`;
+                        break;
+                    case 'range':
+                        desc += `between ${filter.valueMin} and ${filter.valueMax}`;
+                        break;
+                    case 'list':
+                        desc += `in [${filter.values.slice(0, 3).join(', ')}${filter.values.length > 3 ? '...' : ''}]`;
+                        break;
+                    case 'contains':
+                        desc += `contains "${filter.value}"`;
+                        break;
+                }
+                
+                return `${index + 1}. ${desc}`;
+            }).join(`<br><strong>${logic}</strong><br>`);
+
+            if (layers[activeLayerId]?.matchingCount !== undefined) {
+                summaryText += `<br><br><strong>Results:</strong> ${layers[activeLayerId].matchingCount} features match`;
+            }
+
+            summaryContent.innerHTML = summaryText;
+            summaryContainer.style.display = 'block';
+        }
+
+
+
+        // Preview filter on a sample of data for large datasets
+        async function previewFilter() {
+            console.log(`[PREVIEW DEBUG] previewFilter called, activeLayerId: ${activeLayerId}`);
+            
+            if (activeLayerId === null) {
+                alert('Please select a layer first!');
+                return;
+            }
+
+            const layer = layers[activeLayerId];
+            const totalFeatures = layer.originalData.features.length;
+            const sampleSize = Math.min(1000, totalFeatures); // Preview on max 1000 features
+            
+            console.log(`[PREVIEW DEBUG] Previewing on ${sampleSize} of ${totalFeatures} features`);
+
+            // Show loading indicator
+            const loadingIndicator = document.getElementById('filterLoadingIndicator');
+            if (loadingIndicator) loadingIndicator.style.display = 'block';
+
+            try {
+                const filterLogic = document.getElementById('filterLogic').value;
+                const filterRows = document.querySelectorAll('.filter-row');
+                
+                // Collect all filter conditions
+                const conditions = [];
+                for (let filterRow of filterRows) {
+                    const filterId = filterRow.dataset.filterId;
+                    const condition = collectFilterCondition(filterId);
+                    if (condition) {
+                        conditions.push(condition);
+                    }
+                }
+
+                if (conditions.length === 0) {
+                    alert('Please configure at least one filter condition!');
+                    return;
+                }
+
+                // Create random sample data for better representation
+                const sampleFeatures = [];
+                const totalFeatures = layer.originalData.features.length;
+                
+                if (totalFeatures <= sampleSize) {
+                    // If dataset is small, use all features
+                    sampleFeatures.push(...layer.originalData.features);
+                } else {
+                    // Create random sample
+                    const step = Math.floor(totalFeatures / sampleSize);
+                    for (let i = 0; i < sampleSize; i++) {
+                        const index = (i * step) + Math.floor(Math.random() * step);
+                        if (index < totalFeatures) {
+                            sampleFeatures.push(layer.originalData.features[index]);
+                        }
+                    }
+                }
+                
+                console.log(`[PREVIEW DEBUG] Sample created: ${sampleFeatures.length} features from total ${totalFeatures}`);
+                
+                // Show sample data range for the filtered column (for debugging)
+                if (conditions.length > 0) {
+                    const firstCondition = conditions[0];
+                    const columnValues = sampleFeatures
+                        .map(f => f.properties[firstCondition.column])
+                        .filter(v => v !== null && v !== undefined);
+                    
+                    if (columnValues.length > 0) {
+                        const min = Math.min(...columnValues.map(v => parseFloat(v) || 0));
+                        const max = Math.max(...columnValues.map(v => parseFloat(v) || 0));
+                        console.log(`[PREVIEW DEBUG] Sample ${firstCondition.column} range: ${min} - ${max}`);
+                    }
+                }
+                
+                // Process sample
+                const results = await processFilteringMainThread(sampleFeatures, conditions, filterLogic);
+                const matchingFeatures = results.filter(r => r.matches).length;
+                
+                // Show preview results with more detail
+                const percentage = ((matchingFeatures / sampleFeatures.length) * 100).toFixed(1);
+                const estimatedTotal = Math.round((matchingFeatures / sampleFeatures.length) * totalFeatures);
+                
+                // Show sample data info for context
+                let sampleInfo = '';
+                if (conditions.length > 0) {
+                    const firstCondition = conditions[0];
+                    const columnValues = sampleFeatures
+                        .map(f => f.properties[firstCondition.column])
+                        .filter(v => v !== null && v !== undefined);
+                    
+                    if (columnValues.length > 0) {
+                        const min = Math.min(...columnValues.map(v => parseFloat(v) || 0));
+                        const max = Math.max(...columnValues.map(v => parseFloat(v) || 0));
+                        sampleInfo = `\n• Sample ${firstCondition.column} range: ${min} - ${max}`;
+                    }
+                }
+                
+                alert(`Preview Results (Random Sample):\n` +
+                      `• Sample size: ${sampleFeatures.length} of ${totalFeatures} total features\n` +
+                      `• Matches found: ${matchingFeatures} (${percentage}%)\n` +
+                      `• Estimated total matches: ~${estimatedTotal}${sampleInfo}\n\n` +
+                      `${matchingFeatures > 0 ? 
+                        'Looks good! Use "Apply Filters" to process the full dataset.' : 
+                        'No matches in sample. Check your filter conditions or try "Apply Filters" to search the full dataset.'}`);
+
+            } catch (error) {
+                console.error('Preview error:', error);
+                alert('Error previewing filters. Check console for details.');
+            } finally {
+                if (loadingIndicator) loadingIndicator.style.display = 'none';
+            }
+        }
+
+        // Stop filtering and kill all active workers
+        function stopFiltering() {
+            console.log('[STOP] Stopping filtering process...');
+            
+            // Kill all active Web Workers
+            activeFilteringWorkers.forEach(worker => {
+                try {
+                    worker.terminate();
+                    console.log('[STOP] Worker terminated');
+                } catch (error) {
+                    console.log('[STOP] Error terminating worker:', error);
+                }
+            });
+            
+            // Clear the workers array
+            activeFilteringWorkers = [];
+            
+            // Set filtering state to inactive
+            isFilteringActive = false;
+            
+            // Hide loading indicator
+            const loadingIndicator = document.getElementById('filterLoadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+            
+            // Show cancellation message
+            alert('Filtering process stopped. All workers have been terminated.');
+            
+            console.log('[STOP] Filtering process stopped successfully');
+        }
+
+        // ===============================
+        // SEARCHABLE DROPDOWN COMPONENT
+        // ===============================
+
+        function createSearchableDropdown(containerId, options, placeholder = "Type to search...", onSelect = null) {
+            const container = document.getElementById(containerId);
+            if (!container) return null;
+
+            const dropdown = document.createElement('div');
+            dropdown.className = 'searchable-dropdown';
+            dropdown.innerHTML = `
+                <input type="text" placeholder="${placeholder}" autocomplete="off">
+                <div class="searchable-dropdown-list"></div>
+            `;
+
+            const input = dropdown.querySelector('input');
+            const list = dropdown.querySelector('.searchable-dropdown-list');
+            let filteredOptions = [...options];
+            let selectedIndex = -1;
+
+            function renderOptions(searchTerm = '') {
+                filteredOptions = options.filter(option => 
+                    option.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                list.innerHTML = '';
+                selectedIndex = -1;
+
+                if (filteredOptions.length === 0) {
+                    list.innerHTML = '<div class="searchable-dropdown-item" style="color: #6c757d; cursor: default;">No matches found</div>';
+                } else {
+                    filteredOptions.slice(0, 100).forEach((option, index) => { // Limit to 100 for performance
+                        const item = document.createElement('div');
+                        item.className = 'searchable-dropdown-item';
+                        item.textContent = option;
+                        item.onclick = () => selectOption(option);
+                        list.appendChild(item);
+                    });
+
+                    if (filteredOptions.length > 100) {
+                        const moreItem = document.createElement('div');
+                        moreItem.className = 'searchable-dropdown-item';
+                        moreItem.style.color = '#6c757d';
+                        moreItem.style.fontStyle = 'italic';
+                        moreItem.textContent = `... and ${filteredOptions.length - 100} more. Keep typing to narrow down.`;
+                        list.appendChild(moreItem);
+                    }
+                }
+            }
+
+            function selectOption(value) {
+                input.value = value;
+                list.style.display = 'none';
+                if (onSelect) onSelect(value);
+            }
+
+            function showList() {
+                if (filteredOptions.length > 0) {
+                    list.style.display = 'block';
+                }
+            }
+
+            function hideList() {
+                setTimeout(() => {
+                    list.style.display = 'none';
+                }, 150);
+            }
+
+            // Event listeners
+            input.addEventListener('input', (e) => {
+                renderOptions(e.target.value);
+                showList();
+            });
+
+            input.addEventListener('focus', showList);
+            input.addEventListener('blur', hideList);
+
+            input.addEventListener('keydown', (e) => {
+                const items = list.querySelectorAll('.searchable-dropdown-item:not([style*="italic"])');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    updateSelection(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    updateSelection(items);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && items[selectedIndex]) {
+                        selectOption(items[selectedIndex].textContent);
+                    }
+                } else if (e.key === 'Escape') {
+                    list.style.display = 'none';
+                }
+            });
+
+            function updateSelection(items) {
+                items.forEach((item, index) => {
+                    item.classList.toggle('selected', index === selectedIndex);
+                });
+            }
+
+            // Initialize
+            renderOptions();
+            container.innerHTML = '';
+            container.appendChild(dropdown);
+
+            return {
+                getValue: () => input.value,
+                setValue: (value) => { input.value = value; },
+                destroy: () => container.removeChild(dropdown)
+            };
+        }
+
+        // ===============================
+        // END SEARCHABLE DROPDOWN
+        // ===============================
+
+        // ===============================
+        // WEB WORKER FOR PERFORMANCE
+        // ===============================
+
+        function createFilterWorker() {
+            const workerCode = `
+                // Feature matching function for Web Worker
+                function featureMatchesFilter(feature, conditions, logic) {
+                    if (conditions.length === 0) return true;
+
+                    const results = conditions.map(condition => {
+                        const propValue = feature.properties[condition.column];
+                        
+                        switch (condition.type) {
+                            case 'single':
+                                return evaluateSingleCondition(propValue, condition.operator, condition.value);
+                            
+                            case 'range':
+                                const numValue = parseFloat(propValue);
+                                return !isNaN(numValue) && numValue >= condition.valueMin && numValue <= condition.valueMax;
+                            
+                            case 'list':
+                                return condition.values.includes(String(propValue));
+                            
+                            case 'contains':
+                                return String(propValue).toLowerCase().includes(condition.value.toLowerCase());
+                            
+                            default:
+                                return false;
+                        }
+                    });
+
+                    return logic === 'AND' ? results.every(r => r) : results.some(r => r);
+                }
+
+                function evaluateSingleCondition(propValue, operator, conditionValue) {
+                    const strPropValue = String(propValue);
+                    const strConditionValue = String(conditionValue);
+                    const numPropValue = parseFloat(propValue);
+                    const numConditionValue = parseFloat(conditionValue);
+                    
+                    const isNumericComparison = !isNaN(numPropValue) && !isNaN(numConditionValue);
+
+                    switch (operator) {
+                        case 'equals':
+                            return isNumericComparison ? numPropValue === numConditionValue : strPropValue === strConditionValue;
+                        case 'not_equals':
+                            return isNumericComparison ? numPropValue !== numConditionValue : strPropValue !== strConditionValue;
+                        case 'greater_than':
+                            return isNumericComparison && numPropValue > numConditionValue;
+                        case 'less_than':
+                            return isNumericComparison && numPropValue < numConditionValue;
+                        case 'greater_equal':
+                            return isNumericComparison && numPropValue >= numConditionValue;
+                        case 'less_equal':
+                            return isNumericComparison && numPropValue <= numConditionValue;
+                        case 'contains':
+                            return strPropValue.toLowerCase().includes(strConditionValue.toLowerCase());
+                        case 'starts_with':
+                            return strPropValue.toLowerCase().startsWith(strConditionValue.toLowerCase());
+                        case 'ends_with':
+                            return strPropValue.toLowerCase().endsWith(strConditionValue.toLowerCase());
+                        default:
+                            return false;
+                    }
+                }
+
+                // Message handler
+                self.addEventListener('message', function(e) {
+                    const { features, conditions, logic, chunkIndex } = e.data;
+                    
+                    try {
+                        const results = features.map(feature => featureMatchesFilter(feature, conditions, logic));
+                        const matchingCount = results.filter(r => r).length;
+                        
+                        self.postMessage({
+                            success: true,
+                            results,
+                            matchingCount,
+                            chunkIndex,
+                            totalProcessed: features.length
+                        });
+                    } catch (error) {
+                        self.postMessage({
+                            success: false,
+                            error: error.message,
+                            chunkIndex
+                        });
+                    }
+                });
+            `;
+
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            return new Worker(URL.createObjectURL(blob));
+        }
+
+        async function processFilteringWithWorker(features, conditions, logic, progressCallback) {
+            return new Promise((resolve, reject) => {
+                // Optimize for AMD Ryzen 5 4600H (6 cores/12 threads) + 16GB RAM
+                let chunkSize, maxWorkers;
+                if (features.length > 100000) {
+                    chunkSize = 8000; // Larger chunks for 140k+ datasets
+                    maxWorkers = 8; // Use more cores for large datasets
+                } else if (features.length > 50000) {
+                    chunkSize = 4000; // Medium chunks for 50k-100k datasets  
+                    maxWorkers = 6; // Moderate core usage
+                } else {
+                    chunkSize = 2000; // Smaller chunks for normal datasets
+                    maxWorkers = 4; // Conservative core usage
+                }
+                
+                const chunks = [];
+                
+                // Split features into chunks
+                for (let i = 0; i < features.length; i += chunkSize) {
+                    chunks.push(features.slice(i, i + chunkSize));
+                }
+
+                const results = new Array(features.length);
+                const workers = [];
+                let completedChunks = 0;
+                let totalMatching = 0;
+                let actualProcessedFeatures = 0; // Track actual processed features
+                let hasError = false;
+                const startTime = Date.now();
+                
+                // Set filtering state to active
+                isFilteringActive = true;
+                activeFilteringWorkers = []; // Clear previous workers
+
+                console.log(`Processing ${features.length} features in ${chunks.length} chunks using ${maxWorkers} workers`);
+                
+                // Show initial progress (0 processed)
+                if (progressCallback) {
+                    progressCallback(0, 0, 0, features.length, "calculating...");
+                }
+
+                function processChunk(chunkIndex) {
+                    if (chunkIndex >= chunks.length || hasError || !isFilteringActive) return;
+
+                    const worker = createFilterWorker();
+                    workers.push(worker);
+                    activeFilteringWorkers.push(worker); // Track for stopping
+
+                    worker.onmessage = function(e) {
+                        if (hasError || !isFilteringActive) return;
+
+                        const { success, results: chunkResults, matchingCount, error, totalProcessed } = e.data;
+
+                        if (success) {
+                            // Store results in correct position
+                            const startIndex = chunkIndex * chunkSize;
+                            chunkResults.forEach((result, i) => {
+                                results[startIndex + i] = result;
+                            });
+
+                            totalMatching += matchingCount;
+                            completedChunks++;
+
+                            // Calculate progress based on completed chunks (more reliable)
+                            const chunkProgress = (completedChunks / chunks.length) * 100;
+                            // Estimate processed features based on completed chunks
+                            const estimatedProcessedFeatures = Math.floor((completedChunks / chunks.length) * features.length);
+                            
+                            const elapsedTime = (Date.now() - startTime) / 1000; // seconds
+                            
+                            // Avoid division by zero and negative time estimates
+                            let estimatedTimeLeft = 0;
+                            if (elapsedTime > 0 && completedChunks > 0) {
+                                const chunksPerSecond = completedChunks / elapsedTime;
+                                const remainingChunks = chunks.length - completedChunks;
+                                estimatedTimeLeft = remainingChunks / chunksPerSecond; // seconds
+                            }
+                            
+                            console.log(`[PROGRESS DEBUG] Chunks: ${completedChunks}/${chunks.length} (${chunkProgress.toFixed(1)}%), Est. features: ${estimatedProcessedFeatures}/${features.length}`);
+                            
+                            // Format time estimation
+                            const formatTime = (seconds) => {
+                                if (seconds < 60) return `${seconds.toFixed(0)}s`;
+                                const minutes = Math.floor(seconds / 60);
+                                const secs = Math.floor(seconds % 60);
+                                return `${minutes}:${secs.toString().padStart(2, '0')}`;
+                            };
+
+                            // Update progress with real event count and time estimate
+                            if (progressCallback) {
+                                progressCallback(
+                                    chunkProgress, 
+                                    totalMatching, 
+                                    estimatedProcessedFeatures, 
+                                    features.length, 
+                                    formatTime(estimatedTimeLeft)
+                                );
+                            }
+
+                            // Check if all chunks are complete
+                            if (completedChunks === chunks.length) {
+                                // Clean up workers
+                                workers.forEach(w => w.terminate());
+                                activeFilteringWorkers = []; // Clear tracking array
+                                isFilteringActive = false; // Reset state
+                                resolve({ results, totalMatching });
+                            } else {
+                                // Process next chunk with this worker
+                                const nextChunkIndex = chunkIndex + maxWorkers;
+                                if (nextChunkIndex < chunks.length) {
+                                    worker.postMessage({
+                                        features: chunks[nextChunkIndex],
+                                        conditions,
+                                        logic,
+                                        chunkIndex: nextChunkIndex
+                                    });
+                                } else {
+                                    worker.terminate();
+                                }
+                            }
+                        } else {
+                            hasError = true;
+                            workers.forEach(w => w.terminate());
+                            activeFilteringWorkers = []; // Clear tracking array
+                            isFilteringActive = false; // Reset state
+                            reject(new Error(error));
+                        }
+                    };
+
+                    worker.onerror = function(error) {
+                        hasError = true;
+                        workers.forEach(w => w.terminate());
+                        activeFilteringWorkers = []; // Clear tracking array
+                        isFilteringActive = false; // Reset state
+                        reject(error);
+                    };
+
+                    // Start processing
+                    worker.postMessage({
+                        features: chunks[chunkIndex],
+                        conditions,
+                        logic,
+                        chunkIndex
+                    });
+                }
+
+                // Start initial workers
+                for (let i = 0; i < Math.min(maxWorkers, chunks.length); i++) {
+                    processChunk(i);
+                }
+            });
+        }
+
+        async function processFilteringMainThread(features, conditions, logic, progressCallback = null) {
+            const chunkSize = Math.min(2000, Math.max(500, Math.floor(features.length / 10)));
+            const results = [];
+            const startTime = Date.now();
+            let totalMatching = 0;
+            
+            // Set filtering state to active
+            isFilteringActive = true;
+
+            for (let i = 0; i < features.length; i += chunkSize) {
+                // Check if filtering was stopped
+                if (!isFilteringActive) {
+                    console.log('[STOP] Main thread processing stopped');
+                    break;
+                }
+                const chunk = features.slice(i, i + chunkSize);
+                
+                chunk.forEach((feature, chunkIndex) => {
+                    const matches = evaluateFeatureConditions(feature, conditions, logic);
+                    if (matches) totalMatching++;
+                    results.push({ 
+                        feature, 
+                        matches, 
+                        featureIndex: i + chunkIndex
+                    });
+                });
+
+                // Update progress for main thread processing
+                if (progressCallback && i % (chunkSize * 2) === 0) {
+                    const processedFeatures = Math.min(i + chunkSize, features.length);
+                    const elapsedTime = (Date.now() - startTime) / 1000;
+                    const processingRate = processedFeatures / elapsedTime;
+                    const remainingFeatures = features.length - processedFeatures;
+                    const estimatedTimeLeft = remainingFeatures / processingRate;
+                    
+                    const formatTime = (seconds) => {
+                        if (seconds < 60) return `${seconds.toFixed(0)}s`;
+                        const minutes = Math.floor(seconds / 60);
+                        const secs = Math.floor(seconds % 60);
+                        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+                    };
+
+                    progressCallback(
+                        (processedFeatures / features.length) * 100,
+                        totalMatching,
+                        processedFeatures,
+                        features.length,
+                        formatTime(estimatedTimeLeft)
+                    );
+                }
+
+                // Allow UI to update during processing (reduced frequency for performance)
+                if (i % (chunkSize * 5) === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1));
+                }
+            }
+            
+            // Reset filtering state
+            isFilteringActive = false;
+
+            return results;
+        }
+
+        // ===============================
+        // END WEB WORKER
+        // ===============================
+
+        // ===============================
+        // END MULTI-ATTRIBUTE FILTERING
+        // ===============================
         
-        // Populate filter options from active layer
+        // Populate filter options from active layer (LEGACY - kept for compatibility)
         function populateFilterOptions() {
             const filterColumn = document.getElementById('filterColumn');
+            if (!filterColumn) {
+                console.log('[DEBUG] Legacy filterColumn element not found - multi-filter system in use');
+                return; // Multi-filter system doesn't use this element
+            }
+            
             filterColumn.innerHTML = '<option value="">-- Select --</option>';
             
             if (activeLayerId === null || !layers[activeLayerId]) return;
@@ -1357,27 +3721,34 @@
                 return;
             }
             
-            // Count matching features
+            // Count matching features (works with both filter systems)
             let matchCount = 0;
-            layer.data.features.forEach(feature => {
-                const propValue = feature.properties[layer.filterColumn];
-                let matches = false;
-                
-                if (layer.filterColumnType === 'number') {
-                    const numValue = parseFloat(layer.filterValue);
-                    switch(layer.filterOperator) {
-                        case '>=': matches = propValue >= numValue; break;
-                        case '<=': matches = propValue <= numValue; break;
-                        case '=': matches = propValue === numValue; break;
-                        case '>': matches = propValue > numValue; break;
-                        case '<': matches = propValue < numValue; break;
+            
+            if (layer.filterType === 'multi' && layer.multiFilterResults) {
+                // Multi-filter system
+                matchCount = layer.multiFilterResults.filter(r => r.matches).length;
+            } else if (layer.filterColumn && layer.filterValue !== undefined) {
+                // Legacy single filter system
+                layer.data.features.forEach(feature => {
+                    const propValue = feature.properties[layer.filterColumn];
+                    let matches = false;
+                    
+                    if (layer.filterColumnType === 'number') {
+                        const numValue = parseFloat(layer.filterValue);
+                        switch(layer.filterOperator) {
+                            case '>=': matches = propValue >= numValue; break;
+                            case '<=': matches = propValue <= numValue; break;
+                            case '=': matches = propValue === numValue; break;
+                            case '>': matches = propValue > numValue; break;
+                            case '<': matches = propValue < numValue; break;
+                        }
+                    } else {
+                        matches = propValue === layer.filterValue;
                     }
-                } else {
-                    matches = propValue === layer.filterValue;
-                }
-                
-                if (matches) matchCount++;
-            });
+                    
+                    if (matches) matchCount++;
+                });
+            }
             
             if (matchCount === 0) {
                 alert('No matching features to flash!');
