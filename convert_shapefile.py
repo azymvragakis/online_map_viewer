@@ -6,12 +6,12 @@ import json
 
 # List of shapefiles to convert
 shapefiles = [
-    {'input': r'shape_files\eshm13_edited.shp', 'output': 'eshm13_edited.geojson', 'name': 'ESHM13_edited'},
-    {'input': r'shape_files\eshm20_edited.shp', 'output': 'eshm20_edited.geojson', 'name': 'ESHM20_edited'},
-    {'input': r'shape_files\vam16_edited.shp', 'output': 'vam16_edited.geojson', 'name': 'VAM16_edited'},
-    {'input': r'shape_files\eshm13_vanilla.shp', 'output': 'eshm13_vanilla.geojson', 'name': 'ESHM13_vanilla'},
-    {'input': r'shape_files\eshm20_vanilla.shp', 'output': 'eshm20_vanilla.geojson', 'name': 'ESHM20_vanilla'},
-    {'input': r'shape_files\vam16_vanilla.shp', 'output': 'vam16_vanilla.geojson', 'name': 'VAM16_vanilla'}
+    {'input': r'shape_files\rcs_normal.shp', 'output': 'rcs_normal.geojson', 'name': 'RCS_Normal_Faults'},
+    {'input': r'shape_files\rcs_reverse.shp', 'output': 'rcs_reverse.geojson', 'name': 'RCS_Reverse_Faults'},
+    {'input': r'shape_files\rcs_strike_slip.shp', 'output': 'rcs_strike_slip.geojson', 'name': 'RCS_Strike_Slip_Faults'},
+    
+    {'input': r'shape_files\wcs_normal.shp', 'output': 'wcs_normal.geojson', 'name': 'WCS_Normal_Faults'},
+    {'input': r'shape_files\wcs_strike_slip.shp', 'output': 'wcs_strike_slip.geojson', 'name': 'WCS_Strike_Slip_Faults'}
     ]
 
 for shapefile in shapefiles:

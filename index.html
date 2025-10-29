@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -26,8 +26,8 @@
         
         #sidebar {
             width: 300px;
-            background: #f8f9fa;
-            border-right: 2px solid #dee2e6;
+            background: #343a40;
+            border-right: 2px solid #495057;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
@@ -39,21 +39,20 @@
             flex-direction: column;
         }
         
+        /* Minimalistic black header */
         #header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2c3e50;
             color: white;
-            padding: 15px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 12px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            border-bottom: 2px solid #34495e;
         }
         
         #header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        
-        #header p {
-            font-size: 14px;
-            opacity: 0.9;
+            font-size: 22px;
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
         
         .sidebar-section {
@@ -64,10 +63,11 @@
         .sidebar-section h2 {
             font-size: 16px;
             margin-bottom: 15px;
-            color: #495057;
+            color: #f8f9fa;
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
         }
         
         .layer-item {
@@ -319,6 +319,8 @@
             box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
         }
 
+
+
         .filter-row-header {
             display: flex;
             justify-content: space-between;
@@ -394,6 +396,19 @@
             font-weight: 600;
         }
 
+        /* Split Control Styling */
+        .split-control {
+            margin-top: 10px !important;
+        }
+        
+        .split-control input[type="number"] {
+            font-size: 12px;
+        }
+        
+        .split-control input[type="checkbox"] {
+            transform: scale(1.1);
+        }
+
         /* Loading spinner animation */
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -410,19 +425,19 @@
 <body>
     <div id="sidebar">
         <div class="sidebar-section">
-            <h2>📚 Layers</h2>
+            <h2>Layers</h2>
             <div id="layer-list"></div>
         </div>
         
         <div class="sidebar-section">
-            <h2>🔍 Multi-Attribute Filter</h2>
+            <h2>Multi-Attribute Filter</h2>
             <div id="active-layer-indicator" style="padding: 10px; background: #fff3cd; border: 2px solid #ffc107; border-radius: 6px; margin-bottom: 15px; font-weight: 600; color: #856404; text-align: center;">
                 Click a layer to select it first
             </div>
             
             <!-- Filter Logic Selection -->
             <div style="margin-bottom: 15px;">
-                <label style="font-size: 12px; font-weight: 600; color: #495057; display: block; margin-bottom: 5px;">Filter Logic:</label>
+                <label style="font-size: 12px; font-weight: 600; color: #f8f9fa; display: block; margin-bottom: 5px;">Filter Logic:</label>
                 <select id="filterLogic" style="width: 100%; padding: 6px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
                     <option value="AND">All conditions must match (AND)</option>
                     <option value="OR">Any condition can match (OR)</option>
@@ -434,10 +449,13 @@
                 <!-- Filter rows will be dynamically added here -->
             </div>
 
-            <!-- Add Filter Button -->
-            <div style="margin-bottom: 15px;">
-                <button onclick="addFilterRow()" style="width: 100%; padding: 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">
+            <!-- Filter Buttons -->
+            <div style="margin-bottom: 15px; display: flex; gap: 8px;">
+                <button onclick="addFilterRow()" style="flex: 1; padding: 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">
                     ➕ Add Filter Condition
+                </button>
+                <button onclick="clearAllFilters()" style="flex: 0 0 auto; padding: 8px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;" title="Clear all filter conditions and reset layer">
+                    🗑️ Clear All
                 </button>
             </div>
 
@@ -454,15 +472,9 @@
             </div>
 
             <!-- Filter Actions -->
-            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                <button onclick="applyMultiFilter()" style="flex: 1; padding: 8px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
-                    Apply Filters
-                </button>
-                <button onclick="previewFilter()" style="flex: 1; padding: 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 12px;">
-                    Preview (1K Sample)
-                </button>
-                <button onclick="resetAllFilters()" style="flex: 1; padding: 8px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
-                    Reset All
+            <div style="margin-bottom: 10px;">
+                <button onclick="applyMultiFilter()" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                    Add Filter to Layer
                 </button>
             </div>
 
@@ -478,32 +490,27 @@
                 <strong>⚠️ Large Dataset:</strong> Use "Preview" first to test filters on a sample before applying to all data.
             </div>
 
-            <!-- Loading Indicator with Stop Button -->
-            <div id="filterLoadingIndicator" style="display: none; margin-top: 15px; padding: 10px; background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 4px; text-align: center;">
-                <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #007bff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-right: 10px;"></div>
-                <span style="color: #004085; font-weight: 600;">Processing filters...</span>
-                <div style="margin-top: 10px;">
-                    <button id="stopFilteringBtn" onclick="stopFiltering()" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                        ⏹️ Stop Filtering
-                    </button>
-                </div>
-            </div>
+            <!-- Removed progress bar for cleaner interface -->
 
-            <!-- Filter Summary -->
-            <div id="filterSummary" style="display: none; margin-top: 15px; padding: 10px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px;">
-                <div style="font-size: 12px; font-weight: 600; color: #0c5460; margin-bottom: 5px;">Active Filters:</div>
-                <div id="filterSummaryContent" style="font-size: 11px; color: #0c5460;"></div>
+            <!-- All Layers Filters Display -->
+            <div id="allLayersFiltersDisplay" style="margin-top: 20px;">
+                <div style="font-size: 16px; font-weight: 700; color: #007bff; margin-bottom: 15px; display: flex; align-items: center;">
+                    <span style="color: #00ffff; margin-right: 8px;">■</span>
+                    All Layers & Their Filters
+                </div>
+                <div id="allLayersContent" style="max-height: 500px; overflow-y: auto;">
+                    <!-- All layers and their filters will be displayed here -->
+                </div>
             </div>
         </div>
     </div>
     
     <div id="main-content">
         <div id="header">
-            <h1>Multi-Layer Seismic Data Viewer</h1>
-            <p>Toggle layers, adjust opacity, and filter data interactively</p>
+            <h1>Interactive Mapping Viewer</h1>
         </div>
         
-        <div id="info">
+        <div id="info" style="display: none;">
             Loading layers...
         </div>
         
@@ -633,6 +640,10 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <!-- Libraries for KMZ/KML support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.js"></script>
+    
     <script>
         // Layer configuration
         const layerConfigs = [
@@ -684,36 +695,60 @@
                 zIndex: -7,   // Below all data layers (background seismic zones)
                 size: 3     // Line weight for zone boundaries (boundaries only)
             },
+            
+            // === FAULT LINE LAYERS (RCS - Reverse/Crustal Seismogenic sources) ===
             {
-                name: 'Normal Fault Mechanisms',
-                file: 'EAK_Focal_Mechanisms_v20251004_normal.geojson',
+                name: 'RCS Normal Fault Lines',
+                file: 'rcs_normal.geojson',
                 color: '#e74c3c',  // Red for normal faults
-                visible: true,
-                zIndex: 6,  // Top layer for focal mechanisms
-                size: 3     // Line weight for polygon outlines
+                visible: true,  // Visible by default
+                zIndex: 10,  // Above background zones, below point data
+                size: 2     // Standard line weight for fault traces
             },
             {
-                name: 'Strike-slip Fault Mechanisms',
-                file: 'EAK_Focal_Mechanisms_v20251004_strike_slip.geojson',
-                color: '#32CD32',  // lime green for strike-slip faults  
-                visible: true,
-                zIndex: 5,  // Second layer for focal mechanisms
-                size: 3     // Line weight for polygon outlines
-            },            
-            {
-                name: 'Reverse Fault Mechanisms',
-                file: 'EAK_Focal_Mechanisms_v20251004_reverse.geojson',
-                color: '#2c3e50',  // Dark blue/black for reverse faults  
-                visible: true,
-                zIndex: 4,  // Second layer for focal mechanisms
-                size: 3     // Line weight for polygon outlines
+                name: 'RCS Reverse Fault Lines',
+                file: 'rcs_reverse.geojson',
+                color: '#2c3e50',  // Dark blue for reverse faults
+                visible: true,  // Visible by default
+                zIndex: 9,   // Above background zones, below point data
+                size: 2     // Standard line weight for fault traces
             },
+            {
+                name: 'RCS Strike-Slip Fault Lines',
+                file: 'rcs_strike_slip.geojson',
+                color: '#32CD32',  // Lime green for strike-slip faults
+                visible: true,  // Visible by default
+                zIndex: 8,   // Above background zones, below point data
+                size: 2     // Standard line weight for fault traces
+            },
+            
+            // === FAULT LINE LAYERS (WCS - Widespread/Continental Seismogenic sources) ===
+            {
+                name: 'WCS Normal Fault Lines',
+                file: 'wcs_normal.geojson',
+                color: '#ff7f7f',  // Light red for WCS normal faults
+                visible: true,  // Visible by default
+                zIndex: 7,   // Above RCS layers
+                size: 2   // Standard line weight for fault traces
+            },
+            {
+                name: 'WCS Strike-Slip Fault Lines',
+                file: 'wcs_strike_slip.geojson',
+                color: '#90EE90',  // Light green for WCS strike-slip faults
+                visible: true,  // Visible by default
+                zIndex: 6,   // Above other WCS layers
+                size: 2   // Standard line weight for fault traces
+            },
+            
+
+            
+            // === EARTHQUAKE POINT DATA (TOP LAYERS) ===
             {
                 name: 'M4.5+ EQs (h = 45-200 km)',
                 file: 'S1234567_With_MAGS_Mw_wm_2015_M4dt5_h45_200.geojson',
                 color: '#ff6b6b',  // Red for M4+ earthquakes
                 visible: true,
-                zIndex: 3,  // Top layer (smallest dataset)
+                zIndex: 20,  // Top layer (smallest dataset)
                 size: 4     // Smaller circles for M4+
             },
             {
@@ -721,7 +756,7 @@
                 file: 'S1234567_With_MAGS_Mw_wm_2015_M5dt0_h0_44.geojson',
                 color: '#4ecdc4',  // Cyan for M5+ earthquakes
                 visible: true,
-                zIndex: 2,  // Middle layer
+                zIndex: 19,  // Second top layer
                 size: 6     // Medium circles for M5+
             },
             {
@@ -729,7 +764,7 @@
                 file: 'S1234567_With_MAGS_Mw_wm_short.geojson',
                 color: '#6c757d',  // Gray for full catalogue (background)
                 visible: false,
-                zIndex: 1,  // Bottom layer (largest dataset)
+                zIndex: 18,  // Background earthquake data
                 size: 2     // Very small circles for background data
             }
         ];
@@ -776,6 +811,37 @@
             position: 'topright',
             collapsed: true
         }).addTo(map);
+        
+        // Add Split GeoJSON Control
+        const SplitControl = L.Control.extend({
+            onAdd: function(map) {
+                const div = L.DomUtil.create('div', 'leaflet-control leaflet-bar split-control');
+                div.innerHTML = `
+                    <div style="background: white; padding: 10px; border-radius: 4px; box-shadow: 0 1px 5px rgba(0,0,0,0.65); min-width: 200px;">
+                        <div style="font-weight: bold; margin-bottom: 8px; color: #333;">📂 Split Large GeoJSON</div>
+                        <label style="display: flex; align-items: center; margin-bottom: 6px; cursor: pointer;">
+                            <input type="checkbox" id="splitGeoJSONEnabled" style="margin-right: 8px;">
+                            <span style="font-size: 13px;">Enable splitting</span>
+                        </label>
+                        <div id="splitControls" style="display: none;">
+                            <label style="display: block; margin-bottom: 4px; font-size: 12px; color: #666;">Split size:</label>
+                            <input type="number" id="splitSize" value="50000" min="10000" max="100000" step="10000" 
+                                   style="width: 80px; padding: 3px; border: 1px solid #ccc; border-radius: 3px; margin-bottom: 6px;">
+                            <span style="font-size: 11px; color: #888;">features per group</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Prevent map interactions when clicking on control
+                L.DomEvent.disableClickPropagation(div);
+                L.DomEvent.disableScrollPropagation(div);
+                
+                return div;
+            }
+        });
+        
+        // Add the split control to map
+        new SplitControl({ position: 'topright' }).addTo(map);
         
         // Store layers
         let layers = {};
@@ -847,6 +913,10 @@
         
         // Load all layers
         let loadedCount = 0;
+        
+        // Load KMZ files from folder
+        loadKMZFromFolder();
+        
         layerConfigs.forEach((config, index) => {
             fetch(config.file)
                 .then(response => response.json())
@@ -866,7 +936,7 @@
                         console.log(`🚀 EXTREME MODE activated for ${config.file} (${data.features.length} features)`);
                         
                         // Ultra-aggressive optimization for massive dataset
-                        console.log(`⚡ Applying ultra-aggressive optimizations...`);
+                        console.log(`Applying ultra-aggressive optimizations...`);
                         
                         data.features.forEach((feature, index) => {
                             if (feature.geometry && feature.geometry.coordinates) {
@@ -891,7 +961,7 @@
                             }
                         });
                         
-                        console.log(`✅ Ultra-aggressive optimizations complete!`);
+                        console.log(`Ultra-aggressive optimizations complete!`);
                     }
                     
                     layers[index] = {
@@ -923,6 +993,22 @@
                             const layer = layers[id];
                             console.log(`- ${layer.config.name}: ${layer.data.features.length} features, Color: ${layer.config.color}, Size: ${layer.config.size}px, Visible: ${layer.config.visible}`);
                         });
+                        
+                        // Setup split control event listeners after all layers are loaded
+                        setupSplitControlListeners();
+                        
+                        // Check if S1234567 layer exists and is large enough for splitting
+                        const s1234567Layer = Object.values(layers).find(layer => 
+                            layer.config.file && layer.config.file.includes('S1234567_With_MAGS_Mw_wm_short.geojson')
+                        );
+                        
+                        if (s1234567Layer && s1234567Layer.data.features.length > 50000) {
+                            console.log(`📂 Split control available for ${s1234567Layer.config.name} (${s1234567Layer.data.features.length.toLocaleString()} features)`);
+                        } else if (s1234567Layer) {
+                            console.log(`ℹ️ S1234567 layer found but only has ${s1234567Layer.data.features.length} features (split not needed for <50k)`);
+                        } else {
+                            console.log(`ℹ️ S1234567 layer not found - split control available but won't work`);
+                        }
                     }
                 })
                 .catch(error => {
@@ -930,6 +1016,381 @@
                     loadedCount++;
                 });
         });
+        
+        // KMZ Folder Loading Functionality
+        async function loadKMZFromFolder() {
+            console.log('Loading KMZ files from kmz/ folder...');
+            
+            // List of KMZ files to try loading from the kmz folder
+            const kmzFiles = [
+                'eak_fmn.kmz',
+                'eak_fmr.kmz'
+                // Add more filenames as needed
+            ];
+            
+            for (const filename of kmzFiles) {
+                try {
+                    const response = await fetch(`kmz/${filename}`);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        await processKMZFromBlob(blob, filename);
+                    }
+                } catch (error) {
+                    console.log(`Could not load kmz/${filename}: ${error.message}`);
+                }
+            }
+        }
+
+        async function processKMZFromBlob(blob, filename) {
+            try {
+                let kmlContent;
+                
+                if (filename.toLowerCase().endsWith('.kmz')) {
+                    // Extract KML from KMZ (ZIP archive)
+                    kmlContent = await extractKMLFromKMZ(blob);
+                } else {
+                    // Direct KML file
+                    kmlContent = await blob.text();
+                }
+
+                // Parse KML and convert to GeoJSON
+                const geojson = await parseKMLToGeoJSON(kmlContent, filename);
+                
+                if (geojson && geojson.features && geojson.features.length > 0) {
+                    // Create new layer with the KMZ/KML data
+                    const layerName = filename.replace(/\.(kmz|kml)$/i, '');
+                    const layerId = Date.now() + Math.random(); // Unique ID
+                    
+                    // Add to layers array
+                    layers[layerId] = {
+                        config: {
+                            name: layerName,
+                            color: getRandomColor(),
+                            size: 6,
+                            opacity: 0.8,
+                            zIndex: Object.keys(layers).length + 1,
+                            visible: true, // Make KMZ layers visible by default
+                            isKMZ: true // Mark as KMZ layer to preserve original styling
+                        },
+                        data: geojson,
+                        leafletLayer: null,
+                        isVisible: true,
+                        isFiltered: false,
+                        opacity: 0.8
+                    };
+
+                    // Create and add the layer to the map
+                    createLayer(layerId);
+                    renderLayerList();
+                    
+                    console.log(`${filename} loaded (${geojson.features.length} features)`);
+                } else {
+                    console.log(`${filename} contains no valid geographic data`);
+                }
+            } catch (error) {
+                console.error('Error processing KMZ file:', error);
+                console.log(`Error processing ${filename}: ${error.message}`);
+            }
+        }
+
+        async function extractKMLFromKMZ(kmzFile) {
+            // Use JSZip to extract KML from KMZ
+            const JSZip = window.JSZip;
+            if (!JSZip) {
+                throw new Error('JSZip library not loaded. Please include JSZip to handle KMZ files.');
+            }
+
+            const zip = await JSZip.loadAsync(kmzFile);
+            
+            // Look for KML files in the archive
+            let kmlContent = null;
+            for (const [filename, zipEntry] of Object.entries(zip.files)) {
+                if (filename.toLowerCase().endsWith('.kml') && !zipEntry.dir) {
+                    kmlContent = await zipEntry.async('text');
+                    break;
+                }
+            }
+
+            if (!kmlContent) {
+                throw new Error('No KML file found in KMZ archive');
+            }
+
+            return kmlContent;
+        }
+
+        async function parseKMLToGeoJSON(kmlContent, fileName) {
+            try {
+                // Use toGeoJSON library to convert KML to GeoJSON
+                const toGeoJSON = window.toGeoJSON;
+                if (!toGeoJSON) {
+                    throw new Error('toGeoJSON library not loaded. Please include toGeoJSON to handle KML conversion.');
+                }
+
+                // Parse KML XML
+                const parser = new DOMParser();
+                const kmlDoc = parser.parseFromString(kmlContent, 'text/xml');
+                
+                // Check for parsing errors
+                const parseError = kmlDoc.getElementsByTagName('parsererror')[0];
+                if (parseError) {
+                    throw new Error('Invalid KML format');
+                }
+
+                // Convert to GeoJSON
+                const geojson = toGeoJSON.kml(kmlDoc);
+                
+                // Add source information to properties
+                if (geojson.features) {
+                    geojson.features.forEach(feature => {
+                        feature.properties = feature.properties || {};
+                        feature.properties._kmz_source = fileName;
+                        feature.properties._kmz_imported = new Date().toISOString();
+                    });
+                }
+
+                return geojson;
+            } catch (error) {
+                throw new Error(`KML parsing failed: ${error.message}`);
+            }
+        }
+
+        function getRandomColor() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#fd79a8', '#a29bfe', '#fd7e14'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function getKMZFeatureStyle(feature, isHighlighted, layer) {
+            // Extract styling from KML properties or use defaults
+            const props = feature.properties;
+            
+            // KML styling properties (these come from the original KMZ styling)
+            const stroke = props.stroke || layer.config.color;
+            const strokeWidth = props['stroke-width'] || 2;
+            const strokeOpacity = props['stroke-opacity'] || 1.0;
+            const fill = props.fill || layer.config.color;
+            const fillOpacity = props['fill-opacity'] || 0.6;
+            
+            // Apply highlighting if needed
+            const finalStroke = isHighlighted ? '#00ffff' : stroke;
+            const finalWeight = isHighlighted ? Math.max(strokeWidth + 1, 3) : strokeWidth;
+            const finalOpacity = isHighlighted ? 1.0 : strokeOpacity;
+            const finalFillColor = isHighlighted ? '#00ffff' : fill;
+            const finalFillOpacity = isHighlighted ? 0.8 : fillOpacity;
+
+            return {
+                color: finalStroke,
+                weight: finalWeight,
+                opacity: finalOpacity,
+                fillColor: finalFillColor,
+                fillOpacity: finalFillOpacity,
+                fill: true
+            };
+        }
+        
+        // Split GeoJSON Functionality
+        let splitLayers = {}; // Store split layer data
+        let originalLayerHidden = false; // Track if original layer is hidden
+        let S1234567_LAYER_INDEX = null; // Will be dynamically found
+        
+        // Setup split control event listeners
+        function setupSplitControlListeners() {
+            const splitCheckbox = document.getElementById('splitGeoJSONEnabled');
+            const splitControls = document.getElementById('splitControls');
+            const splitSizeInput = document.getElementById('splitSize');
+            
+            if (splitCheckbox) {
+                splitCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        splitControls.style.display = 'block';
+                        applySplit();
+                    } else {
+                        splitControls.style.display = 'none';
+                        removeSplit();
+                    }
+                });
+                
+                if (splitSizeInput) {
+                    splitSizeInput.addEventListener('change', function() {
+                        if (splitCheckbox.checked) {
+                            applySplit(); // Re-apply split with new size
+                        }
+                    });
+                }
+                
+                console.log('📂 Split GeoJSON control ready!');
+            }
+        }
+        
+        function applySplit() {
+            const splitSize = parseInt(document.getElementById('splitSize').value) || 50000;
+            
+            // Find the S1234567 layer dynamically
+            S1234567_LAYER_INDEX = null;
+            Object.keys(layers).forEach(layerId => {
+                const layer = layers[layerId];
+                if (layer.config.file && layer.config.file.includes('S1234567_With_MAGS_Mw_wm_short.geojson')) {
+                    S1234567_LAYER_INDEX = parseInt(layerId);
+                }
+            });
+            
+            if (S1234567_LAYER_INDEX === null) {
+                console.error('S1234567_With_MAGS_Mw_wm_short.geojson layer not found!');
+                alert('Error: EQ catalogue (short) layer not found. Make sure the layer is loaded.');
+                return;
+            }
+            
+            const originalLayer = layers[S1234567_LAYER_INDEX];
+            
+            if (!originalLayer || !originalLayer.data || !originalLayer.data.features) {
+                console.error('S1234567 layer found but has no data or features');
+                return;
+            }
+            
+            console.log(`🎯 Found S1234567 layer at index ${S1234567_LAYER_INDEX}: ${originalLayer.config.name}`);
+            
+            console.log(`📂 Splitting ${originalLayer.config.name} (${originalLayer.data.features.length} features) into groups of ${splitSize.toLocaleString()}`);
+            
+            // Hide original layer
+            if (originalLayer.leafletLayer) {
+                map.removeLayer(originalLayer.leafletLayer);
+                originalLayerHidden = true;
+            }
+            
+            // Clear existing split layers
+            Object.keys(splitLayers).forEach(key => {
+                if (splitLayers[key].leafletLayer) {
+                    map.removeLayer(splitLayers[key].leafletLayer);
+                }
+            });
+            splitLayers = {};
+            
+            // Split features into chunks
+            const features = originalLayer.data.features;
+            const chunks = [];
+            
+            for (let i = 0; i < features.length; i += splitSize) {
+                const chunk = features.slice(i, i + splitSize);
+                chunks.push(chunk);
+            }
+            
+            console.log(`📦 Created ${chunks.length} chunks`);
+            
+            // Create split layers with year-based naming
+            chunks.forEach((chunk, index) => {
+                console.log(`Processing chunk ${index + 1}/${chunks.length} with ${chunk.length} features`);
+                
+                // Debug: Check what properties exist in first feature
+                if (chunk.length > 0 && chunk[0].properties) {
+                    const sampleProps = Object.keys(chunk[0].properties);
+                    console.log(`📝 Sample properties in chunk ${index + 1}:`, sampleProps);
+                    
+                    // Check for Year specifically
+                    const yearValue = chunk[0].properties.Year;
+                    console.log(`📅 First feature Year value:`, yearValue, `(type: ${typeof yearValue})`);
+                }
+                
+                // Find first and last year in chunk - try multiple possible year column names
+                const possibleYearColumns = ['Year', 'year', 'YEAR', 'Date', 'date', 'TIME', 'time'];
+                let years = [];
+                
+                for (const yearCol of possibleYearColumns) {
+                    const yearValues = chunk
+                        .map(f => f.properties?.[yearCol])
+                        .filter(year => year !== null && year !== undefined && !isNaN(year))
+                        .map(year => parseInt(year))
+                        .filter(year => year >= 1800 && year <= 2030) // Reasonable year range
+                        .sort((a, b) => a - b);
+                    
+                    if (yearValues.length > 0) {
+                        years = yearValues;
+                        console.log(`📅 Found ${years.length} valid years in column '${yearCol}': ${years[0]} - ${years[years.length - 1]}`);
+                        break;
+                    }
+                }
+                
+                let layerName, firstYear, lastYear;
+                if (years.length > 0) {
+                    firstYear = years[0];
+                    lastYear = years[years.length - 1];
+                    layerName = firstYear === lastYear ? `${firstYear}` : `${firstYear}_${lastYear}`;
+                    console.log(`Using year-based name: ${layerName}`);
+                } else {
+                    layerName = `part_${index + 1}`;
+                    firstYear = null;
+                    lastYear = null;
+                    console.log(`⚠️ No valid years found, using generic name: ${layerName}`);
+                }
+                
+                // Create GeoJSON for this chunk
+                const chunkGeoJSON = {
+                    type: "FeatureCollection",
+                    features: chunk
+                };
+                
+                // Create layer config
+                const splitLayerKey = `split_${index}`;
+                splitLayers[splitLayerKey] = {
+                    config: {
+                        ...originalLayer.config,
+                        name: `${layerName}.geojson (${chunk.length.toLocaleString()} features)`,
+                        file: `${layerName}.geojson`
+                    },
+                    data: chunkGeoJSON,
+                    originalData: JSON.parse(JSON.stringify(chunkGeoJSON)),
+                    leafletLayer: null,
+                    opacity: originalLayer.opacity,
+                    showInLegend: false,
+                    extremeMode: false // Split layers don't need extreme mode
+                };
+                
+                const yearRangeText = years.length > 0 ? `${firstYear}-${lastYear}` : 'no years';
+                console.log(`Created split layer: ${layerName}.geojson (${chunk.length.toLocaleString()} features, years: ${yearRangeText})`);
+            });
+            
+            // Add split layers to the main layers object with unique indices
+            let splitIndex = 1000; // Start from high number to avoid conflicts
+            Object.keys(splitLayers).forEach(key => {
+                layers[splitIndex] = splitLayers[key];
+                splitIndex++;
+            });
+            
+            // Re-render the layer list and make split layers visible
+            renderLayerList();
+            console.log(`🎉 Split complete! Original layer hidden, ${Object.keys(splitLayers).length} split layers created.`);
+        }
+        
+        function removeSplit() {
+            console.log('🔄 Removing split layers and restoring original...');
+            
+            // Remove split layers from map and layers object
+            Object.keys(layers).forEach(key => {
+                if (parseInt(key) >= 1000) { // Split layers start from index 1000
+                    if (layers[key].leafletLayer) {
+                        map.removeLayer(layers[key].leafletLayer);
+                    }
+                    delete layers[key];
+                }
+            });
+            
+            // Clear split layers storage
+            splitLayers = {};
+            
+            // Restore original layer
+            if (S1234567_LAYER_INDEX !== null) {
+                const originalLayer = layers[S1234567_LAYER_INDEX];
+                if (originalLayer && originalLayerHidden) {
+                    // Re-create the original layer if it was visible before
+                    if (originalLayer.config.visible) {
+                        createLayer(S1234567_LAYER_INDEX);
+                    }
+                    originalLayerHidden = false;
+                }
+            }
+            
+            // Re-render the layer list
+            renderLayerList();
+            console.log('Split layers removed, original layer restored.');
+        }
         
         // Create Leaflet layer
         function createLayer(layerId) {
@@ -1105,6 +1566,11 @@
                     if (feature.geometry.type !== 'Point') {
                         const isHighlighted = featureMatchesFilter(feature);
                         
+                        // Special handling for KMZ layers: preserve original styling when possible
+                        if (layer.config.isKMZ && feature.properties) {
+                            return getKMZFeatureStyle(feature, isHighlighted, layer);
+                        }
+                        
                         // Determine base color: use attribute-based color if enabled, otherwise use layer color
                         let baseColor = layer.config.color;
                         if (layer.colorByAttribute?.enabled && layer.colorByAttribute?.column && layer.colorByAttribute?.mappings) {
@@ -1136,17 +1602,28 @@
                         // Filtered features (highlighted) always use aqua or flash color (overrides attribute color)
                         const highlightColor = layer.flashColor || '#00ffff';
                         const color = isHighlighted ? highlightColor : baseColor;
-                        const opacity = isHighlighted ? layer.opacity : layer.opacity * 0.4; // Dim non-filtered
-                        const baseSize = calculatedSize;
-                        const highlightSize = layer.flashSize || baseSize;
                         
-                        // Check if this is a seismic zone layer (boundaries only)
+                        // Check if this is a seismic zone layer (boundaries only), fault line layer, or focal mechanism
                         const isBoundaryLayer = layer.config.name.includes('ESHM13') || 
                                               layer.config.name.includes('ESHM20') || 
                                               layer.config.name.includes('VAM16');
+                        const isFaultLineLayer = layer.config.name.includes('RCS') || 
+                                               layer.config.name.includes('WCS') || 
+                                               layer.config.name.includes('Fault');
+                        const isFocalMechanismLayer = layer.config.name.includes('Focal') ||
+                                                    layer.config.name.includes('Mechanism');
+                        
+                        // For boundary, fault line, and focal mechanism layers, always use full opacity
+                        // For other layers, dim non-filtered features
+                        const opacity = (isBoundaryLayer || isFaultLineLayer || isFocalMechanismLayer) ? 
+                                       1.0 : // Always full opacity for boundaries, fault lines, and focal mechanisms
+                                       (isHighlighted ? layer.opacity : layer.opacity * 0.4);
+                        
+                        const baseSize = calculatedSize;
+                        const highlightSize = layer.flashSize || baseSize;
                         
                         if (isBoundaryLayer) {
-                            // For seismic zone layers: show only boundaries, no fill
+                            // For seismic zone layers: show only boundaries, no fill, full opacity
                             return {
                                 color: color,
                                 weight: isHighlighted ? highlightSize : baseSize,
@@ -1154,13 +1631,34 @@
                                 fillOpacity: 0, // No fill for boundary layers
                                 fill: false     // Explicitly disable fill
                             };
-                        } else {
-                            // For other layers: normal styling with fill
+                        } else if (isFaultLineLayer) {
+                            // For fault line layers: solid lines with size 2 and full opacity
+                            return {
+                                color: color,
+                                weight: isHighlighted ? 3 : 2, // Always size 2, or 3 when highlighted
+                                opacity: 1.0, // Always full opacity for fault lines
+                                fillOpacity: 0, // No fill for line layers
+                                fill: false,    // Explicitly disable fill
+                                lineCap: 'round',   // Rounded line caps for better appearance
+                                lineJoin: 'round'   // Rounded line joins
+                            };
+                        } else if (isFocalMechanismLayer) {
+                            // For focal mechanism layers: use normal polygon styling
                             return {
                                 color: color,
                                 weight: isHighlighted ? highlightSize : Math.max(1, baseSize - 1),
                                 opacity: opacity,
-                                fillOpacity: opacity * 0.5
+                                fillColor: color,
+                                fillOpacity: Math.min(opacity * 0.6, 0.7)
+                            };
+                        } else {
+                            // For other layers (polygons): normal styling with fill
+                            return {
+                                color: color,
+                                weight: isHighlighted ? highlightSize : Math.max(1, baseSize - 1),
+                                opacity: opacity,
+                                fillColor: color,
+                                fillOpacity: Math.min(opacity * 0.6, 0.7) // Controlled fill opacity
                             };
                         }
                     }
@@ -1285,6 +1783,12 @@
             
             sortedIds.forEach(layerId => {
                 const layer = layers[layerId];
+                
+                // Skip original S1234567 layer if split mode is active
+                if (originalLayerHidden && S1234567_LAYER_INDEX !== null && parseInt(layerId) === S1234567_LAYER_INDEX) {
+                    return; // Skip rendering this layer
+                }
+                
                 const div = document.createElement('div');
                 div.className = 'layer-item' + (activeLayerId == layerId ? ' active' : '');
                 div.onclick = () => setActiveLayer(layerId);
@@ -1295,7 +1799,10 @@
                                ${layer.config.visible ? 'checked' : ''}
                                onchange="toggleLayer(${layerId}, this.checked)"
                                onclick="event.stopPropagation()">
-                        <div class="layer-color" style="background: ${layer.config.color}"></div>
+                        ${layer.config.isKMZ ? 
+                            '<div class="layer-icon" style="width: 16px; height: 16px;"></div>' : 
+                            `<div class="layer-color" style="background: ${layer.config.color}"></div>`
+                        }
                         <span class="layer-name">${layer.config.name}</span>
                         <span class="layer-count">${layer.data.features.length}</span>
                     </div>
@@ -1455,9 +1962,15 @@
             layers[layerId].config.visible = visible;
             
             if (visible) {
+                // Create layer if it doesn't exist (important for split layers)
+                if (!layers[layerId].leafletLayer) {
+                    createLayer(layerId);
+                }
                 layers[layerId].leafletLayer.addTo(map);
             } else {
-                map.removeLayer(layers[layerId].leafletLayer);
+                if (layers[layerId].leafletLayer) {
+                    map.removeLayer(layers[layerId].leafletLayer);
+                }
             }
             
             updateInfo();
@@ -1481,6 +1994,9 @@
                     performanceWarning.style.display = 'none';
                 }
             }
+            
+            // Display existing filters for this layer
+            updatePersistentFilterDisplay();
             
             // Initialize multi-filter system for the new active layer
             initializeMultiFilter();
@@ -2372,7 +2888,7 @@
                 addFilterRow();
             }
 
-            updateFilterSummary();
+            updatePersistentFilterDisplay();
         }
 
         // Add a new filter row
@@ -2381,6 +2897,8 @@
                 alert('Please select a layer first!');
                 return;
             }
+
+
 
             filterRowCounter++;
             const container = document.getElementById('multiFilterContainer');
@@ -2458,13 +2976,50 @@
                     multiFilters[activeLayerId] = multiFilters[activeLayerId].filter(f => f.id !== filterId);
                 }
 
-                updateFilterSummary();
+                updatePersistentFilterDisplay();
 
                 // If no filters remain, add one empty row
                 if (document.getElementById('multiFilterContainer').children.length === 0) {
                     addFilterRow();
                 }
             }
+        }
+
+        // Clear all filter conditions and reset layer to original state
+        function clearAllFilters() {
+            if (activeLayerId === null) {
+                alert('Please select a layer first!');
+                return;
+            }
+
+            // Clear all filter rows
+            const container = document.getElementById('multiFilterContainer');
+            container.innerHTML = '';
+            filterRowCounter = 0;
+
+            // Reset stored filters
+            if (multiFilters[activeLayerId]) {
+                multiFilters[activeLayerId] = [];
+            }
+
+            // Reset layer to original unfiltered state
+            const layer = layers[activeLayerId];
+            if (layer) {
+                layer.isFiltered = false;
+                layer.filterType = null;
+                layer.multiFilterResults = null;
+                layer.matchingCount = 0;
+
+                // Re-create layer with original data
+                createLayer(activeLayerId);
+                updateInfo();
+                updatePersistentFilterDisplay();
+            }
+
+            // Add one empty filter row to start fresh
+            addFilterRow();
+
+            console.log('🗑️ All filters cleared - layer reset to original state');
         }
 
         // Update value input based on column type and filter type
@@ -2634,19 +3189,33 @@
                 const filterLogic = document.getElementById('filterLogic').value;
                 const filterRows = document.querySelectorAll('.filter-row');
                 
-                // Collect all filter conditions
-                const conditions = [];
-                multiFilters[activeLayerId] = []; // Reset stored filters
-
+                // Collect NEW filter conditions from the current filter form
+                const newConditions = [];
+                
                 for (let filterRow of filterRows) {
                     const filterId = filterRow.dataset.filterId;
                     const condition = collectFilterCondition(filterId);
                     
                     if (condition) {
-                        conditions.push(condition);
-                        multiFilters[activeLayerId].push(condition);
+                        newConditions.push(condition);
                     }
                 }
+
+                if (newConditions.length === 0) {
+                    alert('Please configure at least one filter condition!');
+                    return;
+                }
+
+                // Initialize the multiFilters array for this layer if it doesn't exist
+                if (!multiFilters[activeLayerId]) {
+                    multiFilters[activeLayerId] = [];
+                }
+
+                // Add new conditions to existing ones (cumulative filtering)
+                multiFilters[activeLayerId].push(...newConditions);
+
+                // Use ALL conditions (existing + new) for filtering
+                const conditions = [...multiFilters[activeLayerId]];
 
                 if (conditions.length === 0) {
                     alert('Please configure at least one filter condition!');
@@ -2678,15 +3247,22 @@
                         // Check if this is the extreme mode layer (S1234567)
                         const isExtremeMode = layer.extremeMode || false;
                         
-                        // INCREMENTAL RENDERING: Process and render in batches of 20k
-                        const incrementalBatchSize = 20000;
-                        let totalProcessed = 0;
-                        let allResults = [];
-                        let cumulativeMatches = 0;
+                        // Check if this is a split layer (split layers don't need incremental rendering)
+                        const isSplitLayer = parseInt(activeLayerId) >= 1000;
                         
-                        console.log(`🎯 Starting incremental processing in batches of ${incrementalBatchSize.toLocaleString()}`);
+                        // INCREMENTAL RENDERING: Only for original large datasets, not split layers
+                        const useIncrementalRendering = !isSplitLayer && totalFeatures > 80000;
                         
-                        for (let batchStart = 0; batchStart < features.length; batchStart += incrementalBatchSize) {
+                        if (useIncrementalRendering) {
+                            console.log(`🎯 Using incremental rendering for large dataset (${totalFeatures.toLocaleString()} features)`);
+                            const incrementalBatchSize = 20000;
+                            let totalProcessed = 0;
+                            let allResults = [];
+                            let cumulativeMatches = 0;
+                            
+                            console.log(`🎯 Starting incremental processing in batches of ${incrementalBatchSize.toLocaleString()}`);
+                            
+                            for (let batchStart = 0; batchStart < features.length; batchStart += incrementalBatchSize) {
                             const batchEnd = Math.min(batchStart + incrementalBatchSize, features.length);
                             const batchFeatures = features.slice(batchStart, batchEnd);
                             
@@ -2734,10 +3310,25 @@
                             await new Promise(resolve => setTimeout(resolve, 100));
                         }
                         
-                        results = allResults;
-                        matchingFeatures = cumulativeMatches;
-                        
-                        console.log(`🎉 Incremental processing complete! Total: ${matchingFeatures.toLocaleString()} matches from ${features.length.toLocaleString()} features`);
+                            results = allResults;
+                            matchingFeatures = cumulativeMatches;
+                            
+                            console.log(`🎉 Incremental processing complete! Total: ${matchingFeatures.toLocaleString()} matches from ${features.length.toLocaleString()} features`);
+                        } else {
+                            // STANDARD PROCESSING: For split layers and smaller datasets
+                            console.log(`🚀 Using standard processing for ${isSplitLayer ? 'split layer' : 'normal dataset'} (${totalFeatures.toLocaleString()} features)`);
+                            
+                            const workerResult = await processFilteringWithWorker(features, conditions, filterLogic, progressCallback, isExtremeMode);
+                            const workerResults = workerResult.results;
+                            matchingFeatures = workerResult.totalMatching;
+
+                            // Convert worker results to expected format with index for fast lookup
+                            results = features.map((feature, index) => ({
+                                feature,
+                                matches: workerResults[index],
+                                featureIndex: index
+                            }));
+                        }
 
                         console.log(`Web Worker processing complete: ${matchingFeatures} matches found`);
                     } catch (error) {
@@ -2778,7 +3369,10 @@
                 
                 renderLayerList();
                 updateInfo();
-                updateFilterSummary();
+                updatePersistentFilterDisplay();
+
+                // Clear the filter form so users can add more filters
+                initializeMultiFilter();
 
                 // Show completion message
                 const completionMessage = layer.extremeMode 
@@ -2956,11 +3550,190 @@
             }
         }
 
-        // Reset all filters for active layer
-        function resetAllFilters() {
-            if (activeLayerId === null) return;
+        // Global reset function removed - all filtering managed through individual layer displays
 
+        // Old filter summary function removed - using persistent filter display instead
+
+        // Update display showing ALL layers and their filters
+        function updateAllLayersFilterDisplay() {
+            const allLayersContent = document.getElementById('allLayersContent');
+            if (!allLayersContent) return;
+            
+            let allLayersHTML = '';
+            let hasAnyFilters = false;
+            
+            // Go through all layers
+            Object.keys(layers).forEach(layerId => {
+                const layer = layers[layerId];
+                const layerName = layer?.config?.name || `Layer ${layerId}`;
+                const filters = multiFilters[layerId] || [];
+                const isActiveLayer = layerId == activeLayerId;
+                
+                if (filters.length > 0) {
+                    hasAnyFilters = true;
+                    
+                    // Layer header with active indicator
+                    const activeIndicator = isActiveLayer ? '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 8px;">ACTIVE</span>' : '';
+                    
+                    allLayersHTML += `
+                        <div style="background: ${isActiveLayer ? '#e3f2fd' : '#f8f9fa'}; border: 2px solid ${isActiveLayer ? '#007bff' : '#dee2e6'}; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                            <div style="font-size: 14px; font-weight: 700; color: ${isActiveLayer ? '#007bff' : '#f8f9fa'}; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <span style="color: #00ffff; margin-right: 8px;">🗂️</span>
+                                    ${layerName}${activeIndicator}
+                                </div>
+                                <span style="background: ${isActiveLayer ? '#007bff' : '#6c757d'}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">${filters.length}</span>
+                            </div>
+                    `;
+                    
+                    // Add filters for this layer
+                    filters.forEach((filter, index) => {
+                        let filterDesc = '';
+                        let filterIcon = '●';
+                        
+                        switch (filter.type) {
+                            case 'single':
+                                filterDesc = `<strong style="color: #007bff;">${filter.column}</strong> ${filter.operator} <em>"${filter.value}"</em>`;
+                                filterIcon = '=';
+                                break;
+                            case 'range':
+                                filterDesc = `<strong style="color: #007bff;">${filter.column}</strong> between <em>${filter.valueMin}</em> and <em>${filter.valueMax}</em>`;
+                                filterIcon = '⟷';
+                                break;
+                            case 'list':
+                                const valueList = filter.values.slice(0, 3).join(', ');
+                                const moreText = filter.values.length > 3 ? ` (+${filter.values.length - 3} more)` : '';
+                                filterDesc = `<strong style="color: #007bff;">${filter.column}</strong> in [<em>${valueList}${moreText}</em>]`;
+                                filterIcon = '■';
+                                break;
+                            case 'contains':
+                                filterDesc = `<strong style="color: #007bff;">${filter.column}</strong> contains <em>"${filter.value}"</em>`;
+                                filterIcon = '●';
+                                break;
+                            default:
+                                filterDesc = `<strong style="color: #007bff;">${filter.column}</strong>: ${JSON.stringify(filter)}`;
+                                filterIcon = '?';
+                        }
+                        
+                        allLayersHTML += `
+                            <div style="background: white; border: 1px solid #e3f2fd; border-radius: 6px; padding: 12px; margin-bottom: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <div style="flex: 1; display: flex; align-items: center;">
+                                    <span style="font-size: 16px; margin-right: 10px;">${filterIcon}</span>
+                                    <div>${filterDesc}</div>
+                                </div>
+                                <button onclick="removePersistentFilter('${filter.id}')" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 11px; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'" title="Remove this filter">
+                                    ✕ Remove
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    // Add results info if available
+                    if (layer?.matchingCount !== undefined) {
+                        const totalFeatures = layer.originalData?.features?.length || 1;
+                        const percentage = Math.round((layer.matchingCount / totalFeatures) * 100);
+                        allLayersHTML += `
+                            <div style="background: linear-gradient(135deg, #d4edda, #c3e6cb); border: 1px solid #c3e6cb; border-radius: 6px; padding: 12px; margin-top: 12px; font-size: 13px; color: #155724; text-align: center; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <div style="font-size: 16px; margin-bottom: 4px;">🎯</div>
+                                <div><strong>${layer.matchingCount.toLocaleString()}</strong> features match</div>
+                                <div style="font-size: 11px; opacity: 0.8; margin-top: 2px;">${percentage}% of ${totalFeatures.toLocaleString()} total</div>
+                            </div>
+                        `;
+                    }
+                    
+                    allLayersHTML += '</div>';
+                }
+            });
+            
+            if (!hasAnyFilters) {
+                allLayersHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6c757d; font-style: italic;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
+                        <div>No filters applied to any layer yet.</div>
+                        <div style="font-size: 12px; margin-top: 5px;">Add filters using the form above!</div>
+                    </div>
+                `;
+            }
+            
+            allLayersContent.innerHTML = allLayersHTML;
+        }
+
+        // Keep the old function name for compatibility but redirect to new function
+        function updatePersistentFilterDisplay() {
+            updateAllLayersFilterDisplay();
+        }
+
+        // Remove a specific persistent filter and reapply remaining filters
+        function removePersistentFilter(filterId) {
+            if (activeLayerId === null || !multiFilters[activeLayerId]) return;
+            
+            console.log(`Removing filter ${filterId} from layer ${activeLayerId}`);
+            
+            // Remove the filter from the stored filters
+            const originalLength = multiFilters[activeLayerId].length;
+            multiFilters[activeLayerId] = multiFilters[activeLayerId].filter(f => f.id != filterId);
+            
+            console.log(`Filters before: ${originalLength}, after: ${multiFilters[activeLayerId].length}`);
+            
             const layer = layers[activeLayerId];
+            
+            if (multiFilters[activeLayerId].length > 0) {
+                // Reprocess with remaining filters only (don't use the filter form)
+                reprocessLayerWithStoredFilters(activeLayerId);
+            } else {
+                // No filters left, reset the layer completely
+                resetFilterForLayer(activeLayerId);
+            }
+            
+            // Update the display for all layers
+            updateAllLayersFilterDisplay();
+        }
+
+        // Reprocess a layer with its stored filters only (bypass the filter form)
+        async function reprocessLayerWithStoredFilters(layerId) {
+            const layer = layers[layerId];
+            const conditions = multiFilters[layerId] || [];
+            
+            if (conditions.length === 0) {
+                resetFilterForLayer(layerId);
+                return;
+            }
+            
+            console.log(`Reprocessing layer ${layerId} with ${conditions.length} stored filters`);
+            
+            try {
+                const filterLogic = 'AND'; // Default logic
+                const totalFeatures = layer.originalData.features.length;
+                const features = layer.originalData.features;
+                
+                let results = [];
+                let matchingFeatures = 0;
+                
+                // Process filtering without Web Workers for removal operations (faster)
+                results = await processFilteringMainThread(features, conditions, filterLogic);
+                matchingFeatures = results.filter(r => r.matches).length;
+                
+                // Update layer state
+                layer.isFiltered = true;
+                layer.filterType = 'multi';
+                layer.multiFilterResults = results;
+                layer.matchingCount = matchingFeatures;
+                
+                // Recreate the layer with filtered results
+                createLayer(layerId);
+                
+                console.log(`Reprocessing complete: ${matchingFeatures} matches found`);
+                
+            } catch (error) {
+                console.error('Error reprocessing filters:', error);
+                resetFilterForLayer(layerId);
+            }
+        }
+
+        // Reset filters for a specific layer
+        function resetFilterForLayer(layerId) {
+            const layer = layers[layerId];
+            if (!layer) return;
             
             // Clear filter data
             layer.isFiltered = false;
@@ -2968,174 +3741,18 @@
             layer.multiFilterResults = null;
             layer.matchingCount = null;
             
-            // Clear stored filters
-            multiFilters[activeLayerId] = [];
+            // Recreate layer without filters
+            createLayer(layerId);
             
-            // Reset UI
-            initializeMultiFilter();
-            
-            // Update display
-            createLayer(activeLayerId);
+            // Update displays
             renderLayerList();
             updateInfo();
-            updateFilterSummary();
-        }
-
-        // Update filter summary display
-        function updateFilterSummary() {
-            const summaryContainer = document.getElementById('filterSummary');
-            const summaryContent = document.getElementById('filterSummaryContent');
-            const showSummary = document.getElementById('showFilterSummary')?.checked;
-
-            if (!showSummary || activeLayerId === null || !multiFilters[activeLayerId] || multiFilters[activeLayerId].length === 0) {
-                summaryContainer.style.display = 'none';
-                return;
-            }
-
-            const filters = multiFilters[activeLayerId];
-            const logic = document.getElementById('filterLogic')?.value || 'AND';
-            
-            let summaryText = filters.map((filter, index) => {
-                let desc = `${filter.column} `;
-                
-                switch (filter.type) {
-                    case 'single':
-                        desc += `${filter.operator} "${filter.value}"`;
-                        break;
-                    case 'range':
-                        desc += `between ${filter.valueMin} and ${filter.valueMax}`;
-                        break;
-                    case 'list':
-                        desc += `in [${filter.values.slice(0, 3).join(', ')}${filter.values.length > 3 ? '...' : ''}]`;
-                        break;
-                    case 'contains':
-                        desc += `contains "${filter.value}"`;
-                        break;
-                }
-                
-                return `${index + 1}. ${desc}`;
-            }).join(`<br><strong>${logic}</strong><br>`);
-
-            if (layers[activeLayerId]?.matchingCount !== undefined) {
-                summaryText += `<br><br><strong>Results:</strong> ${layers[activeLayerId].matchingCount} features match`;
-            }
-
-            summaryContent.innerHTML = summaryText;
-            summaryContainer.style.display = 'block';
+            updatePersistentFilterDisplay();
         }
 
 
 
-        // Preview filter on a sample of data for large datasets
-        async function previewFilter() {
-            console.log(`[PREVIEW DEBUG] previewFilter called, activeLayerId: ${activeLayerId}`);
-            
-            if (activeLayerId === null) {
-                alert('Please select a layer first!');
-                return;
-            }
-
-            const layer = layers[activeLayerId];
-            const totalFeatures = layer.originalData.features.length;
-            const sampleSize = Math.min(1000, totalFeatures); // Preview on max 1000 features
-            
-            console.log(`[PREVIEW DEBUG] Previewing on ${sampleSize} of ${totalFeatures} features`);
-
-            // Show loading indicator
-            const loadingIndicator = document.getElementById('filterLoadingIndicator');
-            if (loadingIndicator) loadingIndicator.style.display = 'block';
-
-            try {
-                const filterLogic = document.getElementById('filterLogic').value;
-                const filterRows = document.querySelectorAll('.filter-row');
-                
-                // Collect all filter conditions
-                const conditions = [];
-                for (let filterRow of filterRows) {
-                    const filterId = filterRow.dataset.filterId;
-                    const condition = collectFilterCondition(filterId);
-                    if (condition) {
-                        conditions.push(condition);
-                    }
-                }
-
-                if (conditions.length === 0) {
-                    alert('Please configure at least one filter condition!');
-                    return;
-                }
-
-                // Create random sample data for better representation
-                const sampleFeatures = [];
-                const totalFeatures = layer.originalData.features.length;
-                
-                if (totalFeatures <= sampleSize) {
-                    // If dataset is small, use all features
-                    sampleFeatures.push(...layer.originalData.features);
-                } else {
-                    // Create random sample
-                    const step = Math.floor(totalFeatures / sampleSize);
-                    for (let i = 0; i < sampleSize; i++) {
-                        const index = (i * step) + Math.floor(Math.random() * step);
-                        if (index < totalFeatures) {
-                            sampleFeatures.push(layer.originalData.features[index]);
-                        }
-                    }
-                }
-                
-                console.log(`[PREVIEW DEBUG] Sample created: ${sampleFeatures.length} features from total ${totalFeatures}`);
-                
-                // Show sample data range for the filtered column (for debugging)
-                if (conditions.length > 0) {
-                    const firstCondition = conditions[0];
-                    const columnValues = sampleFeatures
-                        .map(f => f.properties[firstCondition.column])
-                        .filter(v => v !== null && v !== undefined);
-                    
-                    if (columnValues.length > 0) {
-                        const min = Math.min(...columnValues.map(v => parseFloat(v) || 0));
-                        const max = Math.max(...columnValues.map(v => parseFloat(v) || 0));
-                        console.log(`[PREVIEW DEBUG] Sample ${firstCondition.column} range: ${min} - ${max}`);
-                    }
-                }
-                
-                // Process sample
-                const results = await processFilteringMainThread(sampleFeatures, conditions, filterLogic);
-                const matchingFeatures = results.filter(r => r.matches).length;
-                
-                // Show preview results with more detail
-                const percentage = ((matchingFeatures / sampleFeatures.length) * 100).toFixed(1);
-                const estimatedTotal = Math.round((matchingFeatures / sampleFeatures.length) * totalFeatures);
-                
-                // Show sample data info for context
-                let sampleInfo = '';
-                if (conditions.length > 0) {
-                    const firstCondition = conditions[0];
-                    const columnValues = sampleFeatures
-                        .map(f => f.properties[firstCondition.column])
-                        .filter(v => v !== null && v !== undefined);
-                    
-                    if (columnValues.length > 0) {
-                        const min = Math.min(...columnValues.map(v => parseFloat(v) || 0));
-                        const max = Math.max(...columnValues.map(v => parseFloat(v) || 0));
-                        sampleInfo = `\n• Sample ${firstCondition.column} range: ${min} - ${max}`;
-                    }
-                }
-                
-                alert(`Preview Results (Random Sample):\n` +
-                      `• Sample size: ${sampleFeatures.length} of ${totalFeatures} total features\n` +
-                      `• Matches found: ${matchingFeatures} (${percentage}%)\n` +
-                      `• Estimated total matches: ~${estimatedTotal}${sampleInfo}\n\n` +
-                      `${matchingFeatures > 0 ? 
-                        'Looks good! Use "Apply Filters" to process the full dataset.' : 
-                        'No matches in sample. Check your filter conditions or try "Apply Filters" to search the full dataset.'}`);
-
-            } catch (error) {
-                console.error('Preview error:', error);
-                alert('Error previewing filters. Check console for details.');
-            } finally {
-                if (loadingIndicator) loadingIndicator.style.display = 'none';
-            }
-        }
+        // Preview filter function removed - filtering now applies directly
 
 
 
@@ -3876,35 +4493,143 @@
                 return;
             }
             
-            // Flash animation - pulse 4 times by changing the highlight color temporarily
-            const originalSize = layer.config.size;
+            // Flash animation using the existing layer flash properties
+            // The style function already handles flash colors correctly for filtered features only
             let flashCount = 0;
-            const maxFlashes = 4;
+            const maxFlashes = 6;
             
             const flashInterval = setInterval(() => {
-                if (flashCount >= maxFlashes * 2) {
-                    // Restore original style
+                if (flashCount >= maxFlashes) {
+                    // Restore original style - remove flash properties
                     layer.flashColor = null;
                     layer.flashSize = null;
-                    createLayer(activeLayerId);
+                    
+                    // Trigger style refresh by calling the layer's resetStyle if available
+                    if (layer.leafletLayer && layer.leafletLayer.resetStyle) {
+                        layer.leafletLayer.resetStyle();
+                    } else if (layer.leafletLayer && layer.leafletLayer.setStyle) {
+                        // Force style recalculation by setting style to a function
+                        layer.leafletLayer.setStyle(function(feature) {
+                            // Use the same logic from createLayer style function
+                            const isHighlighted = layer.isFiltered && (() => {
+                                if (layer.filterType === 'multi' && layer.multiFilterResults) {
+                                    const featureIndex = layer.data.features.findIndex(f => f === feature);
+                                    return featureIndex >= 0 && layer.multiFilterResults[featureIndex]?.matches;
+                                } else if (layer.filterColumn && layer.filterValue !== undefined) {
+                                    const propValue = feature.properties[layer.filterColumn];
+                                    if (layer.filterColumnType === 'number') {
+                                        const numValue = parseFloat(layer.filterValue);
+                                        switch(layer.filterOperator) {
+                                            case '>=': return propValue >= numValue;
+                                            case '<=': return propValue <= numValue;
+                                            case '=': return propValue === numValue;
+                                            case '>': return propValue > numValue;
+                                            case '<': return propValue < numValue;
+                                        }
+                                    } else {
+                                        return propValue === layer.filterValue;
+                                    }
+                                }
+                                return false;
+                            })();
+                            
+                            // Return aqua for filtered features, normal color for others
+                            const highlightColor = '#00ffff'; // Aqua for filtered features
+                            const color = isHighlighted ? highlightColor : layer.config.color;
+                            const opacity = isHighlighted ? layer.opacity : layer.opacity * 0.4;
+                            const size = layer.config.size || 6;
+                            
+                            if (feature.geometry.type === 'Point') {
+                                return {
+                                    radius: size,
+                                    fillColor: color,
+                                    color: "#333",
+                                    weight: 1,
+                                    opacity: opacity,
+                                    fillOpacity: opacity
+                                };
+                            } else {
+                                return {
+                                    fillColor: color,
+                                    color: "#333",
+                                    weight: 2,
+                                    opacity: opacity,
+                                    fillOpacity: opacity * 0.7
+                                };
+                            }
+                        });
+                    }
                     clearInterval(flashInterval);
                     return;
                 }
                 
-                // Toggle between flash and original
+                // Toggle between flash and normal colors
                 if (flashCount % 2 === 0) {
-                    // Flash on - bright red and larger (only for FILTERED features)
+                    // Flash on - bright red for filtered features only
                     layer.flashColor = '#ff0000'; // Bright red
-                    layer.flashSize = originalSize + 4;
+                    layer.flashSize = (layer.config.size || 6) + 3;
                 } else {
-                    // Flash off - back to normal highlight (aqua)
+                    // Flash off - back to aqua for filtered features
                     layer.flashColor = null;
                     layer.flashSize = null;
                 }
                 
-                createLayer(activeLayerId);
+                // Trigger style refresh - the style function will handle showing flash color only for filtered features
+                if (layer.leafletLayer && layer.leafletLayer.setStyle) {
+                    layer.leafletLayer.setStyle(function(feature) {
+                        // Use the same logic from createLayer style function
+                        const isHighlighted = layer.isFiltered && (() => {
+                            if (layer.filterType === 'multi' && layer.multiFilterResults) {
+                                const featureIndex = layer.data.features.findIndex(f => f === feature);
+                                return featureIndex >= 0 && layer.multiFilterResults[featureIndex]?.matches;
+                            } else if (layer.filterColumn && layer.filterValue !== undefined) {
+                                const propValue = feature.properties[layer.filterColumn];
+                                if (layer.filterColumnType === 'number') {
+                                    const numValue = parseFloat(layer.filterValue);
+                                    switch(layer.filterOperator) {
+                                        case '>=': return propValue >= numValue;
+                                        case '<=': return propValue <= numValue;
+                                        case '=': return propValue === numValue;
+                                        case '>': return propValue > numValue;
+                                        case '<': return propValue < numValue;
+                                    }
+                                } else {
+                                    return propValue === layer.filterValue;
+                                }
+                            }
+                            return false;
+                        })();
+                        
+                        // Only apply flash color to filtered features
+                        const flashColor = layer.flashColor;
+                        const highlightColor = flashColor || '#00ffff'; // Flash color or aqua
+                        const color = isHighlighted ? highlightColor : layer.config.color;
+                        const opacity = isHighlighted ? layer.opacity : layer.opacity * 0.4;
+                        const size = isHighlighted && layer.flashSize ? layer.flashSize : (layer.config.size || 6);
+                        
+                        if (feature.geometry.type === 'Point') {
+                            return {
+                                radius: size,
+                                fillColor: color,
+                                color: "#333",
+                                weight: 1,
+                                opacity: opacity,
+                                fillOpacity: opacity
+                            };
+                        } else {
+                            return {
+                                fillColor: color,
+                                color: "#333",
+                                weight: 2,
+                                opacity: opacity,
+                                fillOpacity: opacity * 0.7
+                            };
+                        }
+                    });
+                }
+                
                 flashCount++;
-            }, 300); // Flash every 300ms
+            }, 500); // Flash every 500ms
         }
         
         // Fit map to all visible layers
@@ -3927,23 +4652,11 @@
             }
         }
         
-        // Update info bar
+        // Update info bar (minimalistic - hidden)
         function updateInfo() {
             const info = document.getElementById('info');
-            const visibleLayers = Object.keys(layers).filter(id => layers[id].config.visible);
-            
-            if (visibleLayers.length === 0) {
-                info.innerHTML = 'No layers visible - Check the layer panel to enable layers';
-            } else {
-                const totalLayers = Object.keys(layers).length;
-                const details = visibleLayers.map(id => {
-                    const layer = layers[id];
-                    const filtered = layer.data.features.length !== layer.originalData.features.length;
-                    const color = `<span style="color: ${layer.config.color}; font-weight: bold;">●</span>`;
-                    return `${color} <strong>${layer.config.name}</strong>: ${layer.data.features.length}${filtered ? ' (filtered)' : ''} features`;
-                }).join(' | ');
-                info.innerHTML = `${visibleLayers.length}/${totalLayers} layers visible: ${details}`;
-            }
+            // Hide the info bar for minimalistic design
+            info.style.display = 'none';
         }
         
         // Add event listener for hide checkbox
