@@ -1020,20 +1020,36 @@
         // KMZ Folder Loading Functionality
         async function loadKMZFromFolder() {
             console.log('Loading KMZ files from kmz/ folder...');
+            console.log('Browser:', navigator.userAgent);
+            console.log('Current URL:', window.location.href);
+            
+            // Check if required libraries are loaded
+            console.log('JSZip available:', typeof window.JSZip !== 'undefined');
+            console.log('toGeoJSON available:', typeof window.toGeoJSON !== 'undefined');
+            
+            if (!window.JSZip || !window.toGeoJSON) {
+                console.error('Required libraries not loaded. JSZip:', !!window.JSZip, 'toGeoJSON:', !!window.toGeoJSON);
+                return;
+            }
             
             // List of KMZ files to try loading from the kmz folder
             const kmzFiles = [
                 'eak_fmn.kmz',
-                'eak_fmr.kmz'
+                'eak_fmr.kmz',
+                'eak_fms.kmz'
                 // Add more filenames as needed
             ];
             
             for (const filename of kmzFiles) {
                 try {
+                    console.log(`Attempting to load: ${filename}`);
                     const response = await fetch(`kmz/${filename}`);
                     if (response.ok) {
+                        console.log(`Successfully fetched: ${filename}`);
                         const blob = await response.blob();
                         await processKMZFromBlob(blob, filename);
+                    } else {
+                        console.log(`Failed to fetch ${filename}: ${response.status} ${response.statusText}`);
                     }
                 } catch (error) {
                     console.log(`Could not load kmz/${filename}: ${error.message}`);
@@ -1056,7 +1072,10 @@
                 // Parse KML and convert to GeoJSON
                 const geojson = await parseKMLToGeoJSON(kmlContent, filename);
                 
+                console.log(`Parsed GeoJSON for ${filename}:`, geojson ? `${geojson.features?.length || 0} features` : 'null/undefined');
+                
                 if (geojson && geojson.features && geojson.features.length > 0) {
+                    console.log(`Creating layer for ${filename} with ${geojson.features.length} features`);
                     // Create new layer with the KMZ/KML data
                     const layerName = filename.replace(/\.(kmz|kml)$/i, '');
                     const layerId = Date.now() + Math.random(); // Unique ID
@@ -1080,7 +1099,9 @@
                     };
 
                     // Create and add the layer to the map
+                    console.log(`About to create layer for ${filename} with ID ${layerId}`);
                     createLayer(layerId);
+                    console.log(`Layer created, now rendering layer list`);
                     renderLayerList();
                     
                     console.log(`${filename} loaded (${geojson.features.length} features)`);
