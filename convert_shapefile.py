@@ -6,12 +6,12 @@ import json
 
 # List of shapefiles to convert
 shapefiles = [
-    {'input': r'shape_files\rcs_normal.shp', 'output': 'rcs_normal.geojson', 'name': 'RCS_Normal_Faults'},
-    {'input': r'shape_files\rcs_reverse.shp', 'output': 'rcs_reverse.geojson', 'name': 'RCS_Reverse_Faults'},
-    {'input': r'shape_files\rcs_strike_slip.shp', 'output': 'rcs_strike_slip.geojson', 'name': 'RCS_Strike_Slip_Faults'},
+    {'input': r'shape_files\RCS_polylines.shp', 'output': 'RCS_polylines.geojson', 'name': 'RCS_polylines'},
+    {'input': r'shape_files\WCS_polylines.shp', 'output': 'WCS_polylines.geojson', 'name': 'WCS_polylines'}
+    # {'input': r'shape_files\rcs_strike_slip.shp', 'output': 'rcs_strike_slip.geojson', 'name': 'RCS_Strike_Slip_Faults'},
     
-    {'input': r'shape_files\wcs_normal.shp', 'output': 'wcs_normal.geojson', 'name': 'WCS_Normal_Faults'},
-    {'input': r'shape_files\wcs_strike_slip.shp', 'output': 'wcs_strike_slip.geojson', 'name': 'WCS_Strike_Slip_Faults'}
+    # {'input': r'shape_files\wcs_normal.shp', 'output': 'wcs_normal.geojson', 'name': 'WCS_Normal_Faults'},
+    # {'input': r'shape_files\wcs_strike_slip.shp', 'output': 'wcs_strike_slip.geojson', 'name': 'WCS_Strike_Slip_Faults'}
     ]
 
 for shapefile in shapefiles:

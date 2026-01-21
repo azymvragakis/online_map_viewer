@@ -698,6 +698,14 @@
             
             // === FAULT LINE LAYERS (RCS - Reverse/Crustal Seismogenic sources) ===
             {
+                name: 'RCS Polylines (All Faults)',
+                file: 'RCS_polylines.geojson',
+                color: '#FF6347',  // Tomato red for combined RCS faults
+                visible: false,  // Hidden by default (individual fault types shown instead)
+                zIndex: 11,  // Above individual RCS fault layers
+                size: 2.5   // Slightly thicker line weight
+            },
+            {
                 name: 'RCS Normal Fault Lines',
                 file: 'rcs_normal.geojson',
                 color: '#e74c3c',  // Red for normal faults
@@ -723,6 +731,14 @@
             },
             
             // === FAULT LINE LAYERS (WCS - Widespread/Continental Seismogenic sources) ===
+            {
+                name: 'WCS Polylines (All Faults)',
+                file: 'WCS_polylines.geojson',
+                color: '#1E90FF',  // Dodger blue for combined WCS faults
+                visible: false,  // Hidden by default (individual fault types shown instead)
+                zIndex: 5,   // Above background, below individual WCS layers
+                size: 2.5   // Slightly thicker line weight
+            },
             {
                 name: 'WCS Normal Fault Lines',
                 file: 'wcs_normal.geojson',
