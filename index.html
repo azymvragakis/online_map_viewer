@@ -70,10 +70,76 @@
             font-weight: 600;
         }
         
+        .category-block {
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #495057;
+        }
+        
+        .category-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 14px;
+            user-select: none;
+            transition: all 0.3s;
+        }
+        
+        .category-header:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+        }
+        
+        .category-header .category-icon {
+            font-size: 16px;
+            margin-right: 8px;
+        }
+        
+        .category-header .category-title {
+            flex: 1;
+        }
+        
+        .category-header .category-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-right: 10px;
+        }
+        
+        .category-header .toggle-icon {
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+        
+        .category-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .category-content {
+            background: #2d3339;
+            padding: 10px;
+            max-height: 2000px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s;
+        }
+        
+        .category-content.collapsed {
+            max-height: 0;
+            padding: 0 10px;
+            overflow: hidden;
+        }
+        
         .layer-item {
             background: white;
             padding: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-radius: 6px;
             border: 2px solid #e9ecef;
             cursor: move;
@@ -247,6 +313,17 @@
         .leaflet-popup-content td {
             padding: 4px 8px;
             border-bottom: 1px solid #eee;
+        }
+        
+        /* Custom icon styles for KMZ images */
+        .custom-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .custom-icon-highlighted {
+            filter: drop-shadow(0 0 10px #00ffff) drop-shadow(0 0 20px #00ffff);
+            transform: scale(1.2);
+            transition: all 0.3s ease;
         }
         
         .leaflet-popup-content td:first-child {
@@ -653,15 +730,17 @@
                 color: '#27ae60',  // Green for ESHM13 edited zones
                 visible: false,  // Initially hidden to avoid overwhelming display
                 zIndex: -2,  // Below all data layers (background seismic zones)
-                size: 3     // Line weight for zone boundaries (boundaries only)
+                size: 3,     // Line weight for zone boundaries (boundaries only)
+                category: 'Source Models'
             },
             {
-                name: 'ESHM13 Area Sources',
+                name: 'ESHM13 Vanilla AS',
                 file: 'eshm13_vanilla.geojson',
                 color: '#2ecc71',  // Lighter green for ESHM13 vanilla zones
                 visible: false,  // Initially hidden
                 zIndex: -3,   // Below all data layers (background seismic zones)
-                size: 3     // Line weight for zone boundaries (boundaries only)
+                size: 3,     // Line weight for zone boundaries (boundaries only)
+                category: 'Source Models'
             },
             {
                 name: 'ESHM20 Area Sources (Edited)',
@@ -669,15 +748,17 @@
                 color: '#9b59b6',  // Purple for ESHM20 edited zones
                 visible: false,  // Initially hidden to avoid overwhelming display
                 zIndex: -4,  // Below all data layers (background seismic zones)
-                size: 3     // Line weight for zone boundaries (boundaries only)
+                size: 3,     // Line weight for zone boundaries (boundaries only)
+                category: 'Source Models'
             },
             {
-                name: 'ESHM20 Area Sources',
+                name: 'ESHM20 Vanilla AS',
                 file: 'eshm20_vanilla.geojson',
                 color: '#8e44ad',  // Darker purple for ESHM20 vanilla zones
                 visible: false,  // Initially hidden
                 zIndex: -5,   // Below all data layers (background seismic zones)
-                size: 3     // Line weight for zone boundaries (boundaries only)
+                size: 3,     // Line weight for zone boundaries (boundaries only)
+                category: 'Source Models'
             },
             {
                 name: 'VAM16 Area Sources (Edited)',
@@ -685,95 +766,131 @@
                 color: '#f39c12',  // Orange for VAM16 edited zones
                 visible: false,  // Initially hidden
                 zIndex: -6,   // Below all data layers (background seismic zones)
-                size: 3     // Line weight for zone boundaries (boundaries only)
+                size: 3,     // Line weight for zone boundaries (boundaries only)
+                category: 'Source Models'
             },
             {
-                name: 'VAM16 Area Sources',
-                file: 'vam16_vanilla.geojson',
+                name: 'VAM16 Vanilla AS',
+                file: 'VAM16_vanilla.geojson',
                 color: '#d35400',  // Darker orange for VAM16 vanilla zones
                 visible: false,  // Initially hidden
                 zIndex: -7,   // Below all data layers (background seismic zones)
-                size: 3     // Line weight for zone boundaries (boundaries only)
+                size: 3,     // Line weight for zone boundaries (boundaries only)
+                category: 'Source Models'
             },
             
             // === FAULT LINE LAYERS (RCS - Reverse/Crustal Seismogenic sources) ===
             {
-                name: 'RCS Polylines (All Faults)',
-                file: 'RCS_polylines.geojson',
+                name: 'RCS Normal Faults',
+                file: 'RCS_normal_faultline.geojson',
                 color: '#FF6347',  // Tomato red for combined RCS faults
                 visible: false,  // Hidden by default (individual fault types shown instead)
                 zIndex: 11,  // Above individual RCS fault layers
-                size: 2.5   // Slightly thicker line weight
+                size: 2.5,   // Slightly thicker line weight
+                category: 'Faults'
             },
             {
-                name: 'RCS Normal Fault Lines',
-                file: 'rcs_normal.geojson',
+                name: 'RCS Normal Fault Planes',
+                file: 'RCS_normal_planes.geojson',
                 color: '#e74c3c',  // Red for normal faults
-                visible: true,  // Visible by default
+                visible: false,
                 zIndex: 10,  // Above background zones, below point data
-                size: 2     // Standard line weight for fault traces
+                size: 2,     // Standard line weight for fault traces
+                category: 'Faults'
             },
             {
-                name: 'RCS Reverse Fault Lines',
-                file: 'rcs_reverse.geojson',
+                name: 'RCS Reverse Faults',
+                file: 'RCS_reverse_faultline.geojson',
                 color: '#2c3e50',  // Dark blue for reverse faults
-                visible: true,  // Visible by default
+                visible: false,
                 zIndex: 9,   // Above background zones, below point data
-                size: 2     // Standard line weight for fault traces
+                size: 2,     // Standard line weight for fault traces
+                category: 'Faults'
             },
             {
-                name: 'RCS Strike-Slip Fault Lines',
-                file: 'rcs_strike_slip.geojson',
+                name: 'RCS Reverse Faults Planes',
+                file: 'RCS_reverse_planes.geojson',
+                color: '#2c3e50',  // Dark blue for reverse faults
+                visible: false,
+                zIndex: 9,   // Above background zones, below point data
+                size: 2,     // Standard line weight for fault traces
+                category: 'Faults'
+            },            
+            {
+                name: 'RCS Strike-Slip Faults',
+                file: 'RCS_strike_slip_faultline.geojson',
                 color: '#32CD32',  // Lime green for strike-slip faults
-                visible: true,  // Visible by default
+                visible: false,
                 zIndex: 8,   // Above background zones, below point data
-                size: 2     // Standard line weight for fault traces
+                size: 2,     // Standard line weight for fault traces
+                category: 'Faults'
             },
+            {
+                name: 'RCS Strike-Slip Fault Planes',
+                file: 'RCS_strike_slip_planes.geojson',
+                color: '#32CD32',  // Lime green for strike-slip faults
+                visible: false,
+                zIndex: 8,   // Above background zones, below point data
+                size: 2,     // Standard line weight for fault traces
+                category: 'Faults'
+            },            
             
             // === FAULT LINE LAYERS (WCS - Widespread/Continental Seismogenic sources) ===
             {
-                name: 'WCS Polylines (All Faults)',
-                file: 'WCS_polylines.geojson',
+                name: 'WCS Reverse Faults',
+                file: 'WCS_reverse_faultline.geojson',
                 color: '#1E90FF',  // Dodger blue for combined WCS faults
                 visible: false,  // Hidden by default (individual fault types shown instead)
                 zIndex: 5,   // Above background, below individual WCS layers
-                size: 2.5   // Slightly thicker line weight
+                size: 2.5,   // Slightly thicker line weight
+                category: 'Faults'
             },
             {
-                name: 'WCS Normal Fault Lines',
-                file: 'wcs_normal.geojson',
+                name: 'WCS Reverse Fault Planes',
+                file: 'WCS_reverse_planes.geojson',
                 color: '#ff7f7f',  // Light red for WCS normal faults
-                visible: true,  // Visible by default
+                visible: false,
                 zIndex: 7,   // Above RCS layers
-                size: 2   // Standard line weight for fault traces
+                size: 2,   // Standard line weight for fault traces
+                category: 'Faults'
             },
             {
-                name: 'WCS Strike-Slip Fault Lines',
-                file: 'wcs_strike_slip.geojson',
+                name: 'WCS Strike-Slip Faults',
+                file: 'WCS_strike_slip_faultline.geojson',
                 color: '#90EE90',  // Light green for WCS strike-slip faults
-                visible: true,  // Visible by default
+                visible: false,
                 zIndex: 6,   // Above other WCS layers
-                size: 2   // Standard line weight for fault traces
+                size: 2,   // Standard line weight for fault traces
+                category: 'Faults'
             },
-            
-
+            {
+                name: 'WCS Strike-Slip Fault Planes',
+                file: 'WCS_strike_slip_planes.geojson',
+                color: '#90EE90',  // Light green for WCS strike-slip faults
+                visible: false,
+                zIndex: 6,   // Above other WCS layers
+                size: 2,   // Standard line weight for fault traces
+                category: 'Faults'
+            },            
             
             // === EARTHQUAKE POINT DATA (TOP LAYERS) ===
             {
                 name: 'M4.5+ EQs (h = 45-200 km)',
                 file: 'S1234567_With_MAGS_Mw_wm_2015_M4dt5_h45_200.geojson',
                 color: '#ff6b6b',  // Red for M4+ earthquakes
-                visible: true,
+                visible: false,
                 zIndex: 20,  // Top layer (smallest dataset)
-                size: 4     // Smaller circles for M4+
+                size: 4,     // Smaller circles for M4+
+                category: 'Earthquake Catalogues'
             },
             {
                 name: 'M5.0+ EQs (h = 0-44 km)',  
                 file: 'S1234567_With_MAGS_Mw_wm_2015_M5dt0_h0_44.geojson',
                 color: '#4ecdc4',  // Cyan for M5+ earthquakes
-                visible: true,
+                visible: false,
                 zIndex: 19,  // Second top layer
-                size: 6     // Medium circles for M5+
+                size: 6,     // Medium circles for M5+
+                category: 'Earthquake Catalogues'
             },
             {
                 name: 'EQ catalogue (short)',
@@ -781,7 +898,8 @@
                 color: '#6c757d',  // Gray for full catalogue (background)
                 visible: false,
                 zIndex: 18,  // Background earthquake data
-                size: 2     // Very small circles for background data
+                size: 2,     // Very small circles for background data
+                category: 'Earthquake Catalogues'
             }
         ];
         
@@ -1050,9 +1168,9 @@
             
             // List of KMZ files to try loading from the kmz folder
             const kmzFiles = [
-                'eak_fmn.kmz',
-                'eak_fmr.kmz',
-                'eak_fms.kmz'
+                'FM_normal.kmz',
+                'FM_reverse.kmz',
+                'FM_strike_slip.kmz'
                 // Add more filenames as needed
             ];
             
@@ -1076,17 +1194,21 @@
         async function processKMZFromBlob(blob, filename) {
             try {
                 let kmlContent;
+                let imageFiles = {};
                 
                 if (filename.toLowerCase().endsWith('.kmz')) {
-                    // Extract KML from KMZ (ZIP archive)
-                    kmlContent = await extractKMLFromKMZ(blob);
+                    // Extract KML from KMZ (ZIP archive) with images
+                    const extracted = await extractKMLFromKMZ(blob);
+                    kmlContent = extracted.kmlContent;
+                    imageFiles = extracted.imageFiles;
+                    console.log(`Extracted ${Object.keys(imageFiles).length} images from ${filename}`);
                 } else {
                     // Direct KML file
                     kmlContent = await blob.text();
                 }
 
                 // Parse KML and convert to GeoJSON
-                const geojson = await parseKMLToGeoJSON(kmlContent, filename);
+                const geojson = await parseKMLToGeoJSON(kmlContent, filename, imageFiles);
                 
                 console.log(`Parsed GeoJSON for ${filename}:`, geojson ? `${geojson.features?.length || 0} features` : 'null/undefined');
                 
@@ -1100,25 +1222,28 @@
                     layers[layerId] = {
                         config: {
                             name: layerName,
+                            file: filename,
                             color: getRandomColor(),
-                            size: 6,
-                            opacity: 0.8,
-                            zIndex: Object.keys(layers).length + 1,
-                            visible: true, // Make KMZ layers visible by default
-                            isKMZ: true // Mark as KMZ layer to preserve original styling
+                            visible: false, // Start hidden like other layers
+                            zIndex: 50 + Object.keys(layers).length, // High z-index for KMZ overlays
+                            size: 10, // Larger default size for KMZ icons
+                            type: 'kmz',
+                            category: 'Focal Mechanisms', // Assign to Focal Mechanisms category
+                            isKMZ: true
                         },
                         data: geojson,
+                        originalData: JSON.parse(JSON.stringify(geojson)),
                         leafletLayer: null,
-                        isVisible: true,
-                        isFiltered: false,
-                        opacity: 0.8
+                        opacity: 0.8,
+                        showInLegend: false
                     };
 
                     // Create and add the layer to the map
                     console.log(`About to create layer for ${filename} with ID ${layerId}`);
                     createLayer(layerId);
                     console.log(`Layer created, now rendering layer list`);
-                    renderLayerList();
+                    renderLayerList(); // Update layer list to show the new KMZ layer
+                    updateInfo(); // Update info bar
                     
                     console.log(`${filename} loaded (${geojson.features.length} features)`);
                 } else {
@@ -1139,12 +1264,22 @@
 
             const zip = await JSZip.loadAsync(kmzFile);
             
-            // Look for KML files in the archive
+            // Look for KML files and extract images
             let kmlContent = null;
+            const imageFiles = {};
+            
             for (const [filename, zipEntry] of Object.entries(zip.files)) {
                 if (filename.toLowerCase().endsWith('.kml') && !zipEntry.dir) {
                     kmlContent = await zipEntry.async('text');
-                    break;
+                } else if ((filename.toLowerCase().endsWith('.png') || 
+                           filename.toLowerCase().endsWith('.jpg') || 
+                           filename.toLowerCase().endsWith('.jpeg')) && !zipEntry.dir) {
+                    // Extract image as base64 data URL
+                    const imageData = await zipEntry.async('base64');
+                    const extension = filename.split('.').pop().toLowerCase();
+                    const mimeType = extension === 'png' ? 'image/png' : 'image/jpeg';
+                    imageFiles[filename] = `data:${mimeType};base64,${imageData}`;
+                    console.log(`Extracted image: ${filename}`);
                 }
             }
 
@@ -1152,10 +1287,10 @@
                 throw new Error('No KML file found in KMZ archive');
             }
 
-            return kmlContent;
+            return { kmlContent, imageFiles };
         }
 
-        async function parseKMLToGeoJSON(kmlContent, fileName) {
+        async function parseKMLToGeoJSON(kmlContent, fileName, imageFiles = {}) {
             try {
                 // Use toGeoJSON library to convert KML to GeoJSON
                 const toGeoJSON = window.toGeoJSON;
@@ -1173,15 +1308,41 @@
                     throw new Error('Invalid KML format');
                 }
 
+                // Extract icon information from KML before conversion
+                const placemarks = kmlDoc.getElementsByTagName('Placemark');
+                const iconMap = {};
+                
+                for (let i = 0; i < placemarks.length; i++) {
+                    const placemark = placemarks[i];
+                    const iconNode = placemark.querySelector('Icon href');
+                    if (iconNode) {
+                        const iconHref = iconNode.textContent.trim();
+                        const nameNode = placemark.querySelector('name');
+                        const placemarkName = nameNode ? nameNode.textContent : `placemark_${i}`;
+                        iconMap[placemarkName] = iconHref;
+                    }
+                }
+
                 // Convert to GeoJSON
                 const geojson = toGeoJSON.kml(kmlDoc);
                 
-                // Add source information to properties
+                // Add source information and icon data to properties
                 if (geojson.features) {
-                    geojson.features.forEach(feature => {
+                    geojson.features.forEach((feature, index) => {
                         feature.properties = feature.properties || {};
                         feature.properties._kmz_source = fileName;
                         feature.properties._kmz_imported = new Date().toISOString();
+                        
+                        // Try to find and attach the icon URL
+                        const featureName = feature.properties.name || `placemark_${index}`;
+                        let iconHref = iconMap[featureName];
+                        
+                        // If we have a matching image file, attach the data URL
+                        if (iconHref && imageFiles[iconHref]) {
+                            feature.properties._icon_url = imageFiles[iconHref];
+                            feature.properties._has_custom_icon = true;
+                            console.log(`Attached icon to feature: ${featureName}`);
+                        }
                     });
                 }
 
@@ -1554,6 +1715,26 @@
                 pointToLayer: function(feature, latlng) {
                     const isHighlighted = featureMatchesFilter(feature);
                     
+                    // Check if this feature has a custom icon from KMZ
+                    if (feature.properties._has_custom_icon && feature.properties._icon_url) {
+                        // Use layer size, with larger defaults for icons. Highlighted icons are 20% larger.
+                        const baseIconSize = layer.config.size || 48;
+                        const iconSize = isHighlighted ? baseIconSize * 1.2 : baseIconSize;
+                        const customIcon = L.icon({
+                            iconUrl: feature.properties._icon_url,
+                            iconSize: [iconSize, iconSize],
+                            iconAnchor: [iconSize/2, iconSize/2],
+                            popupAnchor: [0, -iconSize/2],
+                            className: isHighlighted ? 'custom-icon-highlighted' : 'custom-icon'
+                        });
+                        
+                        return L.marker(latlng, {
+                            icon: customIcon,
+                            opacity: isHighlighted ? 1.0 : layer.opacity
+                        });
+                    }
+                    
+                    // Default circle marker behavior for features without custom icons
                     // Determine base color: use attribute-based color if enabled, otherwise use layer color
                     let baseColor = layer.config.color;
                     if (layer.colorByAttribute?.enabled && layer.colorByAttribute?.column && layer.colorByAttribute?.mappings) {
@@ -1808,23 +1989,88 @@
             }
         }
         
+        // Category icons mapping
+        const categoryIcons = {
+            'Focal Mechanisms': '●',
+            'Faults': '▬',
+            'Source Models': '◆',
+            'Earthquake Catalogues': '○'
+        };
+        
+        // Track category collapse state
+        let categoryCollapseState = {
+            'Focal Mechanisms': true, // Collapsed by default
+            'Faults': true, // Collapsed by default
+            'Source Models': true, // Collapsed by default
+            'Earthquake Catalogues': true // Collapsed by default
+        };
+        
         // Render layer list in sidebar
         function renderLayerList() {
             const container = document.getElementById('layer-list');
             container.innerHTML = '';
             
-            // Sort by z-index (top to bottom)
-            const sortedIds = Object.keys(layers).sort((a, b) => 
-                layers[b].config.zIndex - layers[a].config.zIndex
-            );
+            // Group layers by category
+            const layersByCategory = {};
             
-            sortedIds.forEach(layerId => {
-                const layer = layers[layerId];
-                
+            Object.entries(layers).forEach(([layerId, layer]) => {
                 // Skip original S1234567 layer if split mode is active
                 if (originalLayerHidden && S1234567_LAYER_INDEX !== null && parseInt(layerId) === S1234567_LAYER_INDEX) {
-                    return; // Skip rendering this layer
+                    return;
                 }
+                
+                const category = layer.config.category || 'Other';
+                if (!layersByCategory[category]) {
+                    layersByCategory[category] = [];
+                }
+                layersByCategory[category].push([layerId, layer]);
+            });
+            
+            // Define category order
+            const categoryOrder = ['Focal Mechanisms', 'Faults', 'Source Models', 'Earthquake Catalogues'];
+            
+            // Render each category
+            categoryOrder.forEach(categoryName => {
+                if (!layersByCategory[categoryName] || layersByCategory[categoryName].length === 0) {
+                    return; // Skip empty categories
+                }
+                
+                // Sort layers within category by zIndex (descending)
+                const sortedLayers = layersByCategory[categoryName].sort((a, b) => {
+                    return (b[1].config.zIndex || 0) - (a[1].config.zIndex || 0);
+                });
+                
+                // Create category block
+                const categoryBlock = document.createElement('div');
+                categoryBlock.className = 'category-block';
+                
+                // Create category header
+                const categoryHeader = document.createElement('div');
+                categoryHeader.className = 'category-header' + (categoryCollapseState[categoryName] ? ' collapsed' : '');
+                categoryHeader.innerHTML = `
+                    <span class="category-icon">${categoryIcons[categoryName] || '📁'}</span>
+                    <span class="category-title">${categoryName}</span>
+                    <span class="category-count">${sortedLayers.length}</span>
+                    <span class="toggle-icon">▼</span>
+                `;
+                
+                // Create category content
+                const categoryContent = document.createElement('div');
+                categoryContent.className = 'category-content' + (categoryCollapseState[categoryName] ? ' collapsed' : '');
+                
+                // Toggle category on header click
+                categoryHeader.addEventListener('click', () => {
+                    const isCollapsed = categoryHeader.classList.toggle('collapsed');
+                    categoryContent.classList.toggle('collapsed');
+                    categoryCollapseState[categoryName] = isCollapsed;
+                });
+                
+                categoryBlock.appendChild(categoryHeader);
+                categoryBlock.appendChild(categoryContent);
+                container.appendChild(categoryBlock);
+                
+                // Render layers in this category
+                sortedLayers.forEach(([layerId, layer]) => {
                 
                 const div = document.createElement('div');
                 div.className = 'layer-item' + (activeLayerId == layerId ? ' active' : '');
@@ -1983,14 +2229,18 @@
                     </div>
                 `;
                 
-                container.appendChild(div);
-            });
-            
-            // Populate attribute columns for layers with colorByAttribute enabled
-            Object.keys(layers).forEach(layerId => {
-                if (layers[layerId].colorByAttribute?.enabled) {
+                categoryContent.appendChild(div);
+                
+                // Populate attribute columns for layers with colorByAttribute enabled
+                if (layer.colorByAttribute?.enabled) {
                     populateAttributeColumns(layerId);
                 }
+                
+                // Populate size attribute columns for layers with sizeByAttribute enabled
+                if (layer.sizeByAttribute?.enabled) {
+                    populateSizeAttributeColumns(layerId);
+                }
+                });
             });
         }
         

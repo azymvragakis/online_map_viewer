@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "WCS_reverse_faultline",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "Shape_Leng": 2.95652520368, "SS_ID": 1163.0, "START_OBJE": 1, "END_OBJECT": 1, "START_Lon": 20.3217, "END_Lon": 20.3217, "START_Lat": 38.8006, "END_Lat": 38.8006, "START_poin": "A", "END_point_": "A", "START_po_1": 1, "END_point1": 1, "START_SS_I": 1163.0, "END_SS_ID": 1163.0, "START_Stri": 321.0, "END_Strike": 321.0, "START_Dip_": 51.0, "END_Dip_Di": 51.0, "START_Dip": 25.0, "END_Dip": 25.0, "START_Rake": 80.0, "END_Rake": 80.0, "START_Leng": 146.0, "END_Length": 146.0, "START_Widt": 42.5, "END_Width_": 42.5, "START_Min_": 7.0, "END_Min_De": 7.0, "START_Max_": 25.0, "END_Max_De": 25.0, "START_Rupt": 6205.0, "END_Ruptur": 6205.0, "START_Aver": 2.58, "END_Averag": 2.58, "START_Mw__": 7.7, "END_Mw__W_": 7.7, "START_Mw_1": 7.7, "END_Mw__K_": 7.7, "START_M0__": 5.12285e+20, "END_M0__Nm": 5.12285e+20, "START_LonA": 20.3217, "END_LonA": 20.3217, "START_LatA": 38.8006, "END_LatA": 38.8006, "START_LonB": 19.2521, "END_LonB": 19.2521, "START_LatB": 39.821, "END_LatB": 39.821, "START_Lon1": 20.4572, "END_Lon1": 20.4572, "START_Lat1": 38.8855, "END_Lat1": 38.8855, "START_Lon2": 19.3879, "END_Lon2": 19.3879, "START_Lat2": 39.906, "END_Lat2": 39.906, "START_Lon3": 19.7373, "END_Lon3": 19.7373, "START_Lat3": 40.1239, "END_Lat3": 40.1239, "START_Lon4": 20.8057, "END_Lon4": 20.8057, "START_Lat4": 39.1035, "END_Lat4": 39.1035, "START_Slip": null, "END_Slip_r": null, "START_po_2": "A", "END_poin_1": "A", "START_po_3": 1, "END_poin_2": 1 }, "geometry": { "type": "LineString", "coordinates": [ [ 20.3217, 38.8006 ], [ 19.2521, 39.821 ], [ 20.3217, 38.8006 ] ] } }
+]
+}
