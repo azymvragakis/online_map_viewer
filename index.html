@@ -778,6 +778,33 @@
                 size: 3,     // Line weight for zone boundaries (boundaries only)
                 category: 'Source Models'
             },
+            {
+                name: 'GR ESHM13',
+                file: 'GR_ESHM13.geojson',
+                color: '#16a085',  // Teal for GR_ESHM13
+                visible: false,  // Initially hidden
+                zIndex: -8,   // Below all data layers (background seismic zones)
+                size: 3,     // Line weight for zone boundaries (boundaries only)
+                category: 'Source Models'
+            },
+            {
+                name: 'GR ESHM20',
+                file: 'GR_ESHM20.geojson',
+                color: '#c0392b',  // Dark red for GR_ESHM20
+                visible: false,  // Initially hidden
+                zIndex: -9,   // Below all data layers (background seismic zones)
+                size: 3,     // Line weight for zone boundaries (boundaries only)
+                category: 'Source Models'
+            },
+            {
+                name: 'GR VAM16',
+                file: 'GR_VAM16.geojson',
+                color: '#e67e22',  // Carrot orange for GR_VAM16
+                visible: false,  // Initially hidden
+                zIndex: -10,   // Below all data layers (background seismic zones)
+                size: 3,     // Line weight for zone boundaries (boundaries only)
+                category: 'Source Models'
+            },
             
             // === FAULT LINE LAYERS (RCS - Reverse/Crustal Seismogenic sources) ===
             {
@@ -899,6 +926,15 @@
                 visible: false,
                 zIndex: 18,  // Background earthquake data
                 size: 2,     // Very small circles for background data
+                category: 'Earthquake Catalogues'
+            },
+            {
+                name: 'EQ Catalogue M4+',
+                file: 'EqCatM4.geojson',
+                color: '#e74c3c',  // Bright red for M4+ earthquake catalogue
+                visible: false,
+                zIndex: 17,  // Below other earthquake data
+                size: 3,     // Small circles for M4+ data
                 category: 'Earthquake Catalogues'
             }
         ];
